@@ -21,7 +21,7 @@ const accessRight = sequelize.define('access_right', {
 }, {timestamps: false})
 
 const educationalCenter = sequelize.define('educational_center', {
-        educational_center_id: {
+    educational_center_id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
@@ -43,6 +43,10 @@ const educationalCenter = sequelize.define('educational_center', {
         type: DataTypes.STRING,
         allowNull: false,
     },
+    password: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
     site_url: {
         type: DataTypes.STRING,
         allowNull: true,
@@ -53,6 +57,10 @@ const educationalCenter = sequelize.define('educational_center', {
     },
     add_notes: {
         type: DataTypes.TEXT,
+        allowNull: true,
+    },
+    refresh_token: {
+        type: DataTypes.STRING,
         allowNull: true,
     }
 })
@@ -166,6 +174,10 @@ const doctor = sequelize.define('doctor', {
         type: DataTypes.STRING,
         allowNull: false,
     },
+    password: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
     region: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -215,11 +227,30 @@ const curseStatus = sequelize.define('curse_status', {
 curse.belongsToMany(curseStatus, {through: "curseCurseStatus"})
 curseStatus.belongsToMany(curse, {through: "curseCurseStatus"})
 
+const moderation = sequelize.define('moderation', {
+    moderation_id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+        allowNull: false,
+    },
+    educational_center_id: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+    },
+    new_information: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+    }
+})
+moderation.belongsToMany(educationalCenter, {through: "moderEC"})
+educationalCenter.belongsToMany(moderation, {through: "moderEC"})
+
 
 module.exports = {
-    dbBaseSetting,
-    DataTypes,
-    sequelize,
+    // dbBaseSetting,
+    // DataTypes,
+    // sequelize,
     curseStatus,
     category,
     doctor,
@@ -228,4 +259,5 @@ module.exports = {
     articles,
     accessRight,
     educationalCenter,
+    moderation,
 }
