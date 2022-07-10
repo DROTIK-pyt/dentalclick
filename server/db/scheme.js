@@ -248,9 +248,9 @@ educationalCenter.belongsToMany(moderation, {through: "moderEC"})
 
 
 module.exports = {
-    // dbBaseSetting,
-    // DataTypes,
-    // sequelize,
+    dbBaseSetting,
+    DataTypes,
+    sequelize,
     curseStatus,
     category,
     doctor,

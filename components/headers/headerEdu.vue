@@ -2,7 +2,7 @@
     <header class="d-flex align-center pb-10">
         <v-row>
             <v-col class="left" cols="12" sm="3">
-                <nuxt-link to="/">
+                <nuxt-link to="profile">
                     <v-img
                     :src="require('~/assets/images/dentalclick.png')"
                     width="190"
@@ -12,8 +12,9 @@
                 </nuxt-link>
             </v-col>
             <v-col class="right d-flex justify-space-between align-center" cols="12" sm="4" offset-sm="5" tag="ul">
-                <nuxt-link class="header-link text-h6" to="edu-center/curses">Мои курсы</nuxt-link>
-                <nuxt-link class="header-link text-h6" to="edu-center/report">Мои отчеты</nuxt-link>
+                <nuxt-link class="header-link text-h6" to="curses">Мои курсы</nuxt-link>
+                <nuxt-link class="header-link text-h6" to="reports">Мои отчеты</nuxt-link>
+                <nuxt-link class="header-link text-h6" to="blog">Мой блог</nuxt-link>
                 <v-btn
                 tile
                 color="error"

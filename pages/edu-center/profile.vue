@@ -92,7 +92,7 @@
 
 <script>
 export default {
-    layout: 'eduCurses',
+    layout: 'Profile',
     middleware: 'eduCheckAuth',
     data() {
         return {

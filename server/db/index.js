@@ -9,5 +9,5 @@ initScheme()
 
 
 module.exports = {
-  scheme
+  
 }

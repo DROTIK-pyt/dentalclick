@@ -11,16 +11,22 @@
 
 <script>
 import headerEdu from '~/components/headers/headerEdu.vue'
+
 export default {
-    name: 'eduCursesLayout',
-    layout: 'eduCurses',
-    components: {
-        headerEdu
-    },
-    data() {
-        return {
-            
-        }
-    }
+  name: 'ProfileLayout',
+  layout: 'Profile',
+  components: {
+    headerEdu,
+  },
+  beforeMount() {
+    this.$store.commit('eduCenter/syncState')
+  },
+  beforeDestroy() {
+    this.$store.commit('eduCenter/saveState')
+  }
 }
 </script>
+
+<style scoped>
+
+</style>

@@ -1,14 +1,22 @@
 const baseSettings = require('./config/serverSetting.json')
+const {} = require('./db/index')
 
 const express = require("express")
 const cors = require('cors')
-const { educationalCenter, moderation } = require('./db/scheme')
+const { educationalCenter, moderation, articles } = require('./db/scheme')
  
 const app = express()
 app.use(cors())
 
 app.get('/edu', async (req, res) => {
 
+})
+
+app.post('/edu-center/blog/add', async (req, res) => {
+    // await articles.create({
+    //     title: 'title1',
+    //     description: 'descr1',
+    // })
 })
 
 app.post('/edu/login', async (req, res) => {
