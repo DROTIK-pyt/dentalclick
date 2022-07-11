@@ -31,23 +31,13 @@
                     </v-btn>
                 </div>
                 <div class="right">
-                    <v-btn
-                    tile
-                    dark
-                    color="red accent-4"
-                    @click="viewTrash"
-                    >
-                    <v-icon dark left>
-                        mdi-trash-can
-                    </v-icon>
-                    Корзина
-                    </v-btn>
+                    
                 </div>
             </div>
             <br><br>
             <v-data-table
                 :headers="headers"
-                :items="desserts"
+                :items="articles"
                 sort-by="calories"
                 class="elevation-1"
             >
@@ -134,22 +124,20 @@
                     </v-list-item-subtitle>
                     </v-list-item-content>
                 </v-list-item>
-                <v-list-item>
-                    <v-list-item-content>
-                    <v-list-item-title>Рубрики</v-list-item-title>
-                    <v-list-item-subtitle>
-                        <v-select
-                            v-model="editRubrics"
-                            :items="items"
-                            attach
-                            chips
-                            label="Рубрики"
-                            multiple
-                        ></v-select>
-                    </v-list-item-subtitle>
-                    </v-list-item-content>
-                </v-list-item>
                 </v-list>
+                <v-col
+                cols="12"
+                sm="7"
+                >
+                    <v-select
+                        v-model="editRubrics"
+                        :items="items"
+                        attach
+                        chips
+                        label="Рубрики"
+                        multiple
+                    ></v-select>
+                </v-col>
             </v-card>
             </v-dialog>
             <v-dialog
@@ -244,7 +232,7 @@
                 <v-card-title class="text-h5">
                 Удалить {{ deletingTitle }}?
                 </v-card-title>
-                <v-card-text>Статья будет перемещена в корзину и не будет видна на сайте.</v-card-text>
+                <v-card-text>Статья будет безвозвратна удалена.</v-card-text>
                 <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn
@@ -321,7 +309,7 @@ export default {
             deletingId: 0,
             editingId: 0,
             newRubric: "",
-            items: ['r1', 'r2', 'r3'],
+            items: [],
             addRubrics: [],
             editRubrics: [],
 
@@ -336,14 +324,7 @@ export default {
                 { text: 'Дата изменения', value: 'updatedAt' },
                 { text: 'Действия', value: 'actions' },
             ],
-            desserts: [
-                {
-                    id: 1,
-                    title: "title1",
-                    description: "descr1",
-                    rubrics: ['rubric1', 'rubric2']
-                }
-            ],
+            articles: [],
             
         }
     },
@@ -351,42 +332,43 @@ export default {
         async editItem(item) {
             this.titleArticle = item.title
             this.descriptionArticle = item.description
-            this.editRubrics = item.rubrics
-            this.editingId = item.articles_id
-
-            this.isEdit = true
-
-            const editArticle = {
-                articles_id: this.editingId,
-                rubrics: this.editRubrics,
-                description: this.descriptionArticle,
-                title: this.titleArticle,
-                rubrics: this.editRubrics,
-            }
-            const result = await fetch('http://localhost:8888/edu-center/blog/edit', {
-                method: "PUT",
+            const result = await fetch('http://localhost:8888/edu-center/blog/rubrics', {
+                method: "POST",
                 headers: {
                     'Content-Type': 'application/json;charset=utf-8'
                 },
-                body: JSON.stringify(editArticle)
+                body: JSON.stringify({articles_id: item.articles_id})
             })
-            const data = await result.json()
-            if(data.ok) {
-                this.isEdit = false
-            }            
+            const rubrics = await result.json()
+            this.editRubrics = []
+            rubrics.rubrics.forEach(rub => {
+                this.editRubrics.push(rub.title)
+            })
+            this.editingId = item.articles_id
+
+            this.isEdit = true           
         },
         deleteItem(item) {
             this.deletingTitle = item.title
             this.deletingId = item.articles_id
             this.isDelete = true
         },
-        confirmDelete() {
+        async confirmDelete() {
             this.isDelete = false
             // удаляем
+            await fetch('http://localhost:8888/edu-center/blog', {
+                method: "DELETE",
+                 headers: {
+                    'Content-Type': 'application/json;charset=utf-8'
+                },
+                body: JSON.stringify({articles_id: this.deletingId})
+            })
+            this.articles.filter(article => article.articles_id != this.deletingId)
 
-            this.isDelete = false
             this.deletingId = null
             this.deletingTitle = ""
+            this.getAllBlog()
+            this.isDelete = false
         },
         cancelDelete() {
             // ничего не делаем
@@ -408,10 +390,9 @@ export default {
                 },
                 body: JSON.stringify(newArticle)
             })
-            const data = await result.json()
-            if (data.ok) {
-                this.isAdd = false
-            }
+            const article = await result.json()
+            this.articles.push(article.article)
+            this.isAdd = false
         },
         viewTrash() {
             this.$router.push({path: "trash"})
@@ -427,13 +408,47 @@ export default {
             this.isEdit = false
         },
         async addRubric() {
-
+            const result = await fetch('http://localhost:8888/edu-center/blog/rubrics/add', {
+                method: "POST", 
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8'
+                },
+                body: JSON.stringify({title: this.newRubric})
+            })
+            const rub = await result.json()
+            this.items.push(rub.rubric.title)
+            this.newRubric = ""
             this.isAddRubric = false
         },
         async saveArticle() {
+            const editArticle = {
+                articles_id: this.editingId,
+                rubrics: this.editRubrics,
+                description: this.descriptionArticle,
+                title: this.titleArticle,
+            }
+            await fetch('http://localhost:8888/edu-center/blog/edit', {
+                method: "PUT",
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8'
+                },
+                body: JSON.stringify(editArticle)
+            })
+            this.isEdit = false
+        },
+        async getAllBlog() {
+            const result = await fetch('http://localhost:8888/edu-center/blog')
+            const data = await result.json()
             
+            data.blogRubrics.forEach(rub => {
+                this.items.push(rub.title)
+            })
+            this.articles = data.blogArticles
         }
     },
+    async beforeMount() {
+        this.getAllBlog()
+    }
 }
 </script>
 

@@ -1,11 +1,28 @@
 module.exports = function(app) {
-    const { educationalCenter, moderation, articles, rubrics, articlesRubrics } = require('../db/scheme')
+    const { educationalCenter, moderation, articles, rubrics } = require('../db/scheme')
 
-    app.get('/edu/blog', async (req, res) => {
+    app.get('/edu-center/blog', async (req, res) => {
         const blogArticles = await articles.findAll()
         const blogRubrics = await rubrics.findAll()
 
         res.json({blogArticles, blogRubrics})
+    })
+
+    app.post('/edu-center/blog/rubrics', async (req, res) => {
+        const articles_id = req.body.articles_id
+        const article = await articles.findOne({where: {articles_id: articles_id}})
+        const rubrics = await article.getRubrics()
+
+        res.json({rubrics})
+    })
+
+    app.post('/edu-center/blog/rubrics/add', async (req, res) => {
+        const title = req.body.title
+        const rubric = await rubrics.create({
+            title: title
+        })
+
+        res.json({rubric})
     })
 
     app.post('/edu-center/blog/add', async (req, res) => {
@@ -14,22 +31,29 @@ module.exports = function(app) {
             description: req.body.description,
         })
         if (req.body.rubrics.length) {
-            let r = null
             req.body.rubrics.forEach(async rubric => {
-                r = await rubrics.findOne({
+                let t = await rubrics.findOne({where: {
                     title: rubric
-                })
-                await article.addRubric(r, {through: {
-                    articleArticlesId: article.articles_id,
-                    rubricRubricsId: r.rubrics_id,
                 }})
+                await article.addRubric(t)
             })
         }
-        res.json({ok: true})
+        res.json({article})
     })
 
-    app.post('/edu-center/blog/edit', async (req, res) => {
-        const article = await articles.update({
+    app.delete('/edu-center/blog', async (req, res) => {
+        const articles_id = req.body.articles_id
+
+        await articles.destroy({
+            where: {
+                articles_id: articles_id 
+            }
+        })
+
+    })
+
+    app.put('/edu-center/blog/edit', async (req, res) => {
+        await articles.update({
             title: req.body.title,
             description: req.body.description,
         }, {
@@ -37,17 +61,19 @@ module.exports = function(app) {
                 articles_id: req.body.articles_id
             }
         })
+        const article = await articles.findOne({
+            where: {
+                articles_id: req.body.articles_id
+            }
+        })
         if (req.body.rubrics.length) {
-            articlesRubrics.destroy({where: { articleArticlesId: article.articles_id }})
+            article.setRubrics(null)
 
             req.body.rubrics.forEach(async rubric => {
-                const r = await rubrics.findOne({
+                let t = await rubrics.findOne({where: {
                     title: rubric
-                })
-                article.addRubric(r, {through: {
-                    articleArticlesId: article.articles_id,
-                    rubricRubricsId: r.rubrics_id,
                 }})
+                await article.addRubric(t)
             })
         }
         res.json({ok: true})
