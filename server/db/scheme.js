@@ -98,8 +98,10 @@ const rubrics = sequelize.define('rubric', {
         allowNull: false,
     },
 }, {timestamps: false})
-articles.belongsToMany(rubrics, {through: "articlesRubrics"})
-rubrics.belongsToMany(articles, {through: "articlesRubrics"})
+
+const articlesRubrics = sequelize.define('articlesRubric', {}, {timestamps: false, freezeTableName: true})
+articles.belongsToMany(rubrics, {through: articlesRubrics})
+rubrics.belongsToMany(articles, {through: articlesRubrics})
 
 const curse = sequelize.define('curse', {
     curse_id: {
@@ -260,4 +262,5 @@ module.exports = {
     accessRight,
     educationalCenter,
     moderation,
+    articlesRubrics,
 }
