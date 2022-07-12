@@ -20,14 +20,14 @@
                     <v-btn
                     tile
                     color="indigo"
-                    @click="isAddRubric = true"
+                    @click="doRubrics"
                     small
                     class="white--text"
                     >
                     <v-icon left>
-                        mdi-pencil
+                        mdi-view-list
                     </v-icon>
-                    Добавить рубрику
+                    Рубрики
                     </v-btn>
                 </div>
                 <div class="right">
@@ -289,11 +289,116 @@
                 </v-card>
                 </template>
             </v-dialog>
+            <v-dialog
+            v-model="isDoRubrics"
+            width="500"
+            >
+                <v-data-table
+                    :headers="rubricHeaders"
+                    :items="rubricTable"
+                    sort-by="calories"
+                    class="elevation-1"
+                >
+                    <template v-slot:top>
+                        <v-toolbar
+                            flat
+                        >
+                            <v-btn
+                            depressed
+                            color="primary"
+                            @click="toAddRubric"
+                            >
+                            Добавить рубрику
+                            </v-btn>
+                        </v-toolbar>
+                    </template>
+                    <template v-slot:item.actions="{ item }">
+                    <v-icon
+                        small
+                        class="mr-2"
+                        @click="toEditRubric(item)"
+                    >
+                        mdi-pencil
+                    </v-icon>
+                    <v-icon
+                        small
+                        @click="toDeleteRubric(item)"
+                    >
+                        mdi-delete
+                    </v-icon>
+                    </template>
+                </v-data-table>
+                <v-dialog
+                v-model="isDeleteRubric"
+                persistent
+                max-width="290"
+                >
+                <v-card>
+                    <v-card-title class="text-h5">
+                    Удалить {{ deleteRubricTitle }}?
+                    </v-card-title>
+                    <v-card-text>Рубрика будет безвозвратна удалена.</v-card-text>
+                    <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn
+                        color="red darken-1"
+                        text
+                        @click="cancelDeleteRubric"
+                    >
+                        Отмена
+                    </v-btn>
+                    <v-btn
+                        color="green darken-1"
+                        text
+                        @click="confirmDeleteRubric"
+                    >
+                        Хорошо
+                    </v-btn>
+                    </v-card-actions>
+                </v-card>
+                </v-dialog>
+                <v-dialog
+                v-model="isEditRubric"
+                persistent
+                max-width="390"
+                >
+                <v-card>
+                    <v-card-title class="text-h5">
+                    Редактировать рубрику
+                    </v-card-title>
+                    <v-card-text>
+                        <br>
+                        <br>
+                        <v-textarea
+                        name="input-7-1"
+                        filled
+                        label="Название рубрики"
+                        auto-grow
+                        row-height="8"
+                        rows="1"
+                        v-model="editRubricTitle"
+                        ></v-textarea>
+                    </v-card-text>
+                    <v-card-actions class="justify-end">
+                    <v-btn
+                        text
+                        @click="isEditRubric = false"
+                    >Отмена</v-btn>
+                    <v-btn
+                        text
+                        @click="editRubric"
+                    >Сохранить</v-btn>
+                    </v-card-actions>
+                </v-card>
+                </v-dialog>
+            </v-dialog>
         </v-col>
     </div>
 </template>
 
 <script>
+const baseSettings = require('../../../server/config/serverSetting')
+
 export default {
     layout: 'Profile',
     middleware: 'eduCheckAuth',
@@ -312,6 +417,23 @@ export default {
             items: [],
             addRubrics: [],
             editRubrics: [],
+            editRubricId: 0,
+            editRubricTitle: null,
+            isDoRubrics: false,
+            isEditRubric: false,
+            isDeleteRubric: false,
+            deleteRubricTitle: null,
+            deleteRubricId: 0,
+
+            rubricHeaders: [
+                {
+                text: 'Название рубрики',
+                align: 'start',
+                value: 'title',
+                },
+                { text: 'Действия', value: 'actions' },
+            ],
+            rubricTable: [],
 
             headers: [
                 {
@@ -332,7 +454,7 @@ export default {
         async editItem(item) {
             this.titleArticle = item.title
             this.descriptionArticle = item.description
-            const result = await fetch('http://localhost:8888/edu-center/blog/rubrics', {
+            const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/blog/rubrics`, {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json;charset=utf-8'
@@ -354,11 +476,10 @@ export default {
             this.isDelete = true
         },
         async confirmDelete() {
-            this.isDelete = false
             // удаляем
-            await fetch('http://localhost:8888/edu-center/blog', {
+            await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/blog`, {
                 method: "DELETE",
-                 headers: {
+                headers: {
                     'Content-Type': 'application/json;charset=utf-8'
                 },
                 body: JSON.stringify({articles_id: this.deletingId})
@@ -370,11 +491,38 @@ export default {
             this.getAllBlog()
             this.isDelete = false
         },
+        toDeleteRubric(item) {
+            this.isDeleteRubric = true
+            this.deleteRubricId = item.rubrics_id
+            this.deleteRubricTitle = item.title
+        },
+        toEditRubric(item) {
+            this.isEditRubric = true
+            this.editRubricId = item.rubrics_id
+            this.editRubricTitle = item.title
+        },
+        async confirmDeleteRubric() {
+            this.isDeleteRubric = false
+            await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/blog/rubrics`, {
+                method: "DELETE",
+                 headers: {
+                    'Content-Type': 'application/json;charset=utf-8'
+                },
+                body: JSON.stringify({rubrics_id: this.deleteRubricId})
+            })
+            this.items = this.items.filter(rubric => rubric != this.deleteRubricTitle)
+            this.rubricTable = this.rubricTable.filter(rubric => rubric.title != this.deleteRubricTitle)
+        },
         cancelDelete() {
             // ничего не делаем
             this.isDelete = false
             this.deletingId = null
             this.deletingTitle = ""
+        },
+        cancelDeleteRubric() {
+            this.isDeleteRubric = false
+            this.deleteRubricId = 0
+            this.deleteRubricTitle = ""
         },
         async addArticle() {
             this.isAdd = true
@@ -383,7 +531,7 @@ export default {
                 description: this.descriptionArticle,
                 rubrics: this.addRubrics
             }
-            const result = await fetch('http://localhost:8888/edu-center/blog/add', {
+            const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/blog/add`, {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json;charset=utf-8'
@@ -407,8 +555,11 @@ export default {
             this.descriptionArticle = ""
             this.isEdit = false
         },
+        toAddRubric() {
+            this.isAddRubric = true
+        },
         async addRubric() {
-            const result = await fetch('http://localhost:8888/edu-center/blog/rubrics/add', {
+            const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/blog/rubrics/add`, {
                 method: "POST", 
                 headers: {
                     'Content-Type': 'application/json;charset=utf-8'
@@ -417,8 +568,34 @@ export default {
             })
             const rub = await result.json()
             this.items.push(rub.rubric.title)
+            this.rubricTable.push({
+                title: rub.rubric.title,
+                rubrics_id: rub.rubric.rubrics_id
+            })
             this.newRubric = ""
             this.isAddRubric = false
+        },
+        async editRubric() {
+            const title = this.editRubricTitle
+            const rubrics_id = this.editRubricId
+            console.log({title: title, rubrics_id: rubrics_id})
+
+            const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/blog/rubrics/edit`, {
+                method: "PUT",
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8'
+                },
+                body: JSON.stringify({title: title, rubrics_id: rubrics_id})
+            })
+            const data = await result.json()
+            this.rubricTable = data.rubric
+            this.items = []
+            data.rubric.forEach(rub => {
+                this.items.push(rub.title)
+            })
+
+            this.getAllBlog()
+            this.isEditRubric = false
         },
         async saveArticle() {
             const editArticle = {
@@ -427,7 +604,7 @@ export default {
                 description: this.descriptionArticle,
                 title: this.titleArticle,
             }
-            await fetch('http://localhost:8888/edu-center/blog/edit', {
+            await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/blog/edit`, {
                 method: "PUT",
                 headers: {
                     'Content-Type': 'application/json;charset=utf-8'
@@ -437,15 +614,22 @@ export default {
             this.isEdit = false
         },
         async getAllBlog() {
-            const result = await fetch('http://localhost:8888/edu-center/blog')
+            const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/blog`)
             const data = await result.json()
             
             data.blogRubrics.forEach(rub => {
                 this.items.push(rub.title)
             })
             this.articles = data.blogArticles
+        },
+        async doRubrics() {
+            this.isDoRubrics = true
+            const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/blog/rubrics`)
+            const data = await result.json()
+
+            this.rubricTable = data.result
         }
-    },
+    }, 
     async beforeMount() {
         this.getAllBlog()
     }

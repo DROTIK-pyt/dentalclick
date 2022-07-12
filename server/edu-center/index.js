@@ -1,5 +1,6 @@
 module.exports = function(app) {
     const { educationalCenter, moderation, articles, rubrics } = require('../db/scheme')
+    // не articles.create({}), educationalCenter.addArticle()
 
     app.get('/edu-center/blog', async (req, res) => {
         const blogArticles = await articles.findAll()
@@ -23,6 +24,51 @@ module.exports = function(app) {
         })
 
         res.json({rubric})
+    })
+
+    app.get('/edu-center/blog/rubrics', async (req, res) => {
+        const result = await rubrics.findAll()
+
+        res.json({result})
+    })
+
+    app.put('/edu-center/blog/rubrics/edit', async (req, res) => {
+        const title = req.body.title
+        const rubrics_id = req.body.rubrics_id
+
+        await rubrics.update({
+            title: title
+        }, {where: {
+            rubrics_id: rubrics_id
+        }})
+
+        const rubric = await rubrics.findAll()
+        res.json({rubric})
+    })
+
+    app.delete('/edu-center/blog/rubrics', async (req, res) => {
+        const rubrics_id = req.body.rubrics_id
+
+        await rubrics.destroy({
+            where: {
+                rubrics_id: rubrics_id
+            }
+        })
+
+        res.json({ok: true})
+    })
+
+    app.put('/edu-center/blog/rubrics', async (req, res) => {
+        const title = req.body.title
+        const rubrics_id = req.body.rubrics_id
+
+        await rubrics.update({
+            title: title
+        }, {
+            where: {
+                rubrics_id: rubrics_id
+            }
+        })
     })
 
     app.post('/edu-center/blog/add', async (req, res) => {
@@ -50,6 +96,7 @@ module.exports = function(app) {
             }
         })
 
+        res.json({ok: true})
     })
 
     app.put('/edu-center/blog/edit', async (req, res) => {
