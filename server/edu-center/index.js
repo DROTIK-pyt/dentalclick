@@ -1,5 +1,5 @@
-module.exports = function(app) {
-    const { educationalCenter, moderation, articles, rubrics } = require('../db/scheme')
+module.exports = function(app, upload) {
+    const { educationalCenter, moderation, articles, rubrics, curse, category } = require('../db/scheme')
     // не articles.create({}), educationalCenter.addArticle()
 
     app.get('/edu-center/blog', async (req, res) => {
@@ -126,6 +126,35 @@ module.exports = function(app) {
         res.json({ok: true})
     })
 
+    app.post('/edu-center/curses/add', upload.single('image'), async (req, res) => {
+        let arr = req.file.originalname.split('.')
+        const extension = arr.slice(-1)[0]
+
+        const imageSrc = `${req.body.uniqueSuffix}.${extension}`
+
+        const aCurse = await curse.create({
+            title: req.body.title,
+            program: req.body.program,
+            town: req.body.town,
+            address: req.body.address,
+            lector: req.body.lector,
+            date_start: req.body.date_start,
+            date_end: req.body.date_end,
+            price: req.body.price,
+            score: req.body.score,
+            image: imageSrc,
+        })
+
+        res.json({aCurse})
+    })
+
+    app.get('/edu-center/curses', async (req, res) => {
+        const curses = await curse.findAll()
+        const categories = await category.findAll()
+
+        res.json({curses, categories})
+    })
+
     app.post('/edu/login', async (req, res) => {
         res.json({
             id: "71624571",
@@ -145,9 +174,6 @@ module.exports = function(app) {
             educational_center_id: data.id,
             new_information: JSON.stringify(data)
         })
-        center.addModerate(newModerate, {through: {
-            moderationModerationId: newModerate.moderation_id,
-            educationalCenterEducationalCenterId: data.id
-        }})
+        center.addModerate(newModerate)
     })
 }

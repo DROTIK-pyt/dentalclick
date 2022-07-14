@@ -2,7 +2,7 @@ import Vue from "vue"
 
 export const state = () => ({
     profile: {
-        isAuth: true,
+        isAuth: false,
         tokens: {
             access: null,
             refresh: null,
