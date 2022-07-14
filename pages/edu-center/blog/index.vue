@@ -294,6 +294,8 @@
 </template>
 
 <script>
+const baseSettings = require('../../../server/config/serverSetting.json')
+
 export default {
     layout: 'Profile',
     middleware: 'eduCheckAuth',
@@ -332,7 +334,7 @@ export default {
         async editItem(item) {
             this.titleArticle = item.title
             this.descriptionArticle = item.description
-            const result = await fetch('http://localhost:8888/edu-center/blog/rubrics', {
+            const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/blog/rubrics`, {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json;charset=utf-8'
@@ -356,7 +358,7 @@ export default {
         async confirmDelete() {
             this.isDelete = false
             // удаляем
-            await fetch('http://localhost:8888/edu-center/blog', {
+            await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/blog`, {
                 method: "DELETE",
                  headers: {
                     'Content-Type': 'application/json;charset=utf-8'
@@ -383,7 +385,7 @@ export default {
                 description: this.descriptionArticle,
                 rubrics: this.addRubrics
             }
-            const result = await fetch('http://localhost:8888/edu-center/blog/add', {
+            const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/blog/add`, {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json;charset=utf-8'
@@ -408,7 +410,7 @@ export default {
             this.isEdit = false
         },
         async addRubric() {
-            const result = await fetch('http://localhost:8888/edu-center/blog/rubrics/add', {
+            const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/blog/rubrics/add`, {
                 method: "POST", 
                 headers: {
                     'Content-Type': 'application/json;charset=utf-8'
@@ -427,7 +429,7 @@ export default {
                 description: this.descriptionArticle,
                 title: this.titleArticle,
             }
-            await fetch('http://localhost:8888/edu-center/blog/edit', {
+            await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/blog/edit`, {
                 method: "PUT",
                 headers: {
                     'Content-Type': 'application/json;charset=utf-8'
@@ -437,7 +439,7 @@ export default {
             this.isEdit = false
         },
         async getAllBlog() {
-            const result = await fetch('http://localhost:8888/edu-center/blog')
+            const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/blog`)
             const data = await result.json()
             
             data.blogRubrics.forEach(rub => {
