@@ -7,7 +7,7 @@ const multer  = require('multer')
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, 'uploads')
+        cb(null, '../static/uploads')
     },
     filename: function (req, file, cb) {
         let arr = file.originalname.split('.')
@@ -23,6 +23,8 @@ const app = express()
 app.use(cors())
 app.use(express.json({ limit: '500kb', parameterLimit: 10000 })) // for parsing application/json
 app.use(express.urlencoded({ extended: true, limit: '500kb', parameterLimit: 10000 }))
+
+app.use(express.static('static')); 
 
 require('./edu-center/index')(app, upload) // Образовательный центр
 

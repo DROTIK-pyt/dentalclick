@@ -1,5 +1,7 @@
 module.exports = function(app, upload) {
-    const { educationalCenter, moderation, articles, rubrics, curse, category } = require('../db/scheme')
+    const { educationalCenter, moderation, articles, rubrics, curse, category, curseStatus } = require('../db/scheme')
+    const fs = require('fs')
+    const baseSettings = require('../config/serverSetting')
     // не articles.create({}), educationalCenter.addArticle()
 
     app.get('/edu-center/blog', async (req, res) => {
@@ -130,7 +132,7 @@ module.exports = function(app, upload) {
         let arr = req.file.originalname.split('.')
         const extension = arr.slice(-1)[0]
 
-        const imageSrc = `${req.body.uniqueSuffix}.${extension}`
+        const imageSrc = `/uploads/${req.body.uniqueSuffix}.${extension}`
 
         const aCurse = await curse.create({
             title: req.body.title,
@@ -148,11 +150,103 @@ module.exports = function(app, upload) {
         res.json({aCurse})
     })
 
-    app.get('/edu-center/curses', async (req, res) => {
-        const curses = await curse.findAll()
-        const categories = await category.findAll()
+    app.put('/edu-center/curses/edit', upload.single('image'), async (req, res) => {
+        let arr = req.file.originalname.split('.')
+        const extension = arr.slice(-1)[0]
 
-        res.json({curses, categories})
+        const imageSrc = `/uploads/${req.body.uniqueSuffix}.${extension}`
+
+        const image = await curse.findOne({where: {curse_id: req.body.curse_id}})
+
+        fs.unlink(`../static${image.image}`, (err) => {console.log(err)})
+
+        const aCurse = await curse.update({
+            title: req.body.title,
+            program: req.body.program,
+            town: req.body.town,
+            address: req.body.address,
+            lector: req.body.lector,
+            date_start: req.body.date_start,
+            date_end: req.body.date_end,
+            price: req.body.price,
+            score: req.body.score,
+            image: imageSrc,
+        }, {
+            where: {
+                curse_id: req.body.curse_id
+            }
+        })
+
+        res.json({aCurse})
+    })
+
+    app.delete('/edu-center/curses/trash', async (req, res) => {
+        const aCurse = await curse.findOne({
+            where: {
+                curse_id: req.body.curse_id
+            }
+        })
+        const trash = await curseStatus.findOne({
+            where: {
+                title: "trashed"
+            }
+        })
+
+        await trash.addCurse(aCurse)
+
+        res.json({ok: true})
+    })
+
+    app.delete('/edu-center/curses', async (req, res) => {
+        await curse.destroy({
+            where: {
+                curse_id: req.body.curse_id
+            }
+        })
+
+        res.json({ok: true})
+    })
+    
+    app.post('/edu-center/curses/reestablish', async (req, res) => {
+        const trash = await curseStatus.findOne({
+            where: {
+                title: "trashed"
+            }
+        })
+        const aCurse = await curse.findOne({
+            where: {
+                curse_id: req.body.curse_id
+            }
+        })
+        await trash.removeCurse(aCurse)
+
+        res.json({ok: true})
+    })
+
+    app.get('/edu-center/curses', async (req, res) => {
+        const curses = await curse.findAll({raw: true})
+        const categories = await category.findAll()
+        const trash = await curseStatus.findOne({
+            where: {
+                title: "trashed"
+            }
+        })
+        const trashedCurses = await trash.getCurses()
+        console.log(trashedCurses)
+
+        let resultCurses = []
+        curses.forEach(cur => {
+            trashedCurses.forEach(tc => {
+                if (tc.curse_id != cur.curse_id) {
+                    resultCurses.push(cur)
+                }
+            })
+        })
+        if (!trashedCurses.length) {
+            resultCurses = curses
+        }
+
+        res.json({trashedCurses, categories, curses: resultCurses})
     })
 
     app.post('/edu/login', async (req, res) => {

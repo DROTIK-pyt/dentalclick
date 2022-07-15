@@ -6,7 +6,7 @@
         >
             <v-data-table
                 :headers="curseHeaders"
-                :items="curseTable"
+                :items="dataTableItems"
                 :search="searchCurse"
                 sort-by="calories"
                 class="elevation-1"
@@ -48,12 +48,23 @@
                     <v-btn
                     tile
                     color="primary"
+                    class="mr-5"
                     @click="doCategory"
                     >
                     <v-icon left>
                         mdi-table
                     </v-icon>
                     Категории
+                    </v-btn>
+                    <v-btn
+                    tile
+                    :color="trashBtnColor"
+                    @click="showTrash = !showTrash"
+                    >
+                    <v-icon left>
+                        mdi-trash-can
+                    </v-icon>
+                    {{ trashBtnTitle }}
                     </v-btn>
                 </v-toolbar>
                 </template>
@@ -230,6 +241,162 @@
                 </v-card>
             </v-dialog>
             <v-dialog
+                v-model="isEditCurse"
+                fullscreen
+                hide-overlay
+                transition="dialog-bottom-transition"
+                >
+                <v-card>
+                    <v-toolbar
+                    dark
+                    color="primary"
+                    >
+                    <v-btn
+                        icon
+                        dark
+                        @click="cancelEditCurse"
+                    >
+                        <v-icon>mdi-close</v-icon>
+                    </v-btn>
+                    <v-toolbar-title>Редактирование нового курса</v-toolbar-title>
+                    <v-spacer></v-spacer>
+                    <v-toolbar-items>
+                        <v-btn
+                        dark
+                        text
+                        @click="confirmEditCurse"
+                        >
+                        Загрузить
+                        </v-btn>
+                    </v-toolbar-items>
+                    </v-toolbar>
+                    <v-card
+                    three-line
+                    subheader
+                    >
+                    <v-subheader>Данные курса</v-subheader>
+                    <v-list-item>
+                        <v-list-item-content>
+                        <v-text-field
+                            label="Название"
+                            v-model="editCurseTitle"
+                        ></v-text-field>
+                        </v-list-item-content>
+                    </v-list-item>
+                    <v-list-item>
+                        <v-textarea
+                        name="input-7-1"
+                        label="Программа курса"
+                        rows="5"
+                        row-height="20"
+                        v-model="editCurseProgram"
+                        ></v-textarea>
+                    </v-list-item>
+                    <v-list-item>
+                        <v-list-item-content>
+                        <v-text-field
+                            label="Город проведения"
+                            v-model="editCurseTown"
+                        ></v-text-field>
+                        </v-list-item-content>
+                    </v-list-item>
+                    <v-list-item>
+                        <v-list-item-content>
+                        <v-text-field
+                            label="Адрес проведения"
+                            v-model="editCurseAddress"
+                        ></v-text-field>
+                        </v-list-item-content>
+                    </v-list-item>
+                    <v-list-item>
+                        <v-list-item-content>
+                        <v-text-field
+                            label="ФИО лектора(ов)"
+                            v-model="editCurseLector"
+                        ></v-text-field>
+                        </v-list-item-content>
+                    </v-list-item>
+                    <v-list-item>
+                        <v-list-item-content>
+                        <v-col
+                        cols="12"
+                        sm="3"
+                        >
+                        <span>Дата начала</span><br>
+                        <br><v-date-picker v-model="editCurseDateStart"></v-date-picker>
+                        </v-col>
+                        </v-list-item-content>
+                    </v-list-item>
+                    <v-list-item>
+                        <v-list-item-content>
+                        <v-col
+                        cols="12"
+                        sm="3"
+                        >
+                        <span>Дата окончания</span><br>
+                        <br><v-date-picker v-model="editCurseDateEnd"></v-date-picker>
+                        </v-col>
+                        </v-list-item-content>
+                    </v-list-item>
+                    <v-list-item>
+                        <v-list-item-content>
+                        <v-text-field
+                            label="Цена"
+                            v-model="editCursePrice"
+                        ></v-text-field>
+                        </v-list-item-content>
+                    </v-list-item>
+                    <v-list-item>
+                        <v-list-item-content>
+                        <v-text-field
+                            label="Баллы"
+                            v-model="editCurseScore"
+                        ></v-text-field>
+                        </v-list-item-content>
+                    </v-list-item>
+                    <v-list-item>
+                        <v-col
+                        cols="12"
+                        sm="7"
+                        >
+                            <v-select
+                                v-model="editCurseCategories"
+                                :items="categories"
+                                attach
+                                chips
+                                label="Категории"
+                                multiple
+                            ></v-select>
+                        </v-col>
+                    </v-list-item>
+                    <v-list-item>
+                        <v-col
+                        cols="12"
+                        sm="3"
+                        >
+                            <v-file-input
+                            ref="imageCurseEdit"
+                            @change="fileUploadEdit"
+                            label="Картинка курса"
+                            accept="image/*"
+                            ></v-file-input>
+                        </v-col>
+                        <v-col
+                        cols="12"
+                        sm="9"
+                        >
+                        <v-img
+                        v-if="editCurseImagePreview"
+                        max-height="178"
+                        max-width="284"
+                        :src="editCurseImagePreview"
+                        ></v-img>
+                        </v-col>
+                    </v-list-item>
+                    </v-card>
+                </v-card>
+            </v-dialog>
+            <v-dialog
             v-model="showCategories"
             fullscreen
             hide-overlay
@@ -287,6 +454,64 @@
                     </v-card-actions>
                 </v-card>
             </v-dialog>
+            <v-dialog
+            v-model="isDeleteCurse"
+            persistent
+            max-width="290"
+            >
+            <v-card>
+                <v-card-title class="text-h5">
+                Удалить {{ deleteCurseTitle }}?
+                </v-card-title>
+                <v-card-text>Курс будет перемещен в корзину</v-card-text>
+                <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn
+                    color="red darken-1"
+                    text
+                    @click="cancelDeleteCurse"
+                >
+                    Отмена
+                </v-btn>
+                <v-btn
+                    color="green darken-1"
+                    text
+                    @click="confirmDeleteCurse"
+                >
+                    Хорошо
+                </v-btn>
+                </v-card-actions>
+            </v-card>
+            </v-dialog>
+            <v-dialog
+            v-model="showEditInTrashError"
+            persistent
+            max-width="380"
+            >
+            <v-card>
+                <v-card-title class="text-h5">
+                Для редактирования нужно восстановить курс
+                </v-card-title>
+                <v-card-text>Курс будет восстановлен.</v-card-text>
+                <v-card-actions>
+                <v-spacer></v-spacer>
+                <v-btn
+                    color="red darken-1"
+                    text
+                    @click="cancelReestablishCurse"
+                >
+                    Отмена
+                </v-btn>
+                <v-btn
+                    color="green darken-1"
+                    text
+                    @click="confirmReestablishCurse"
+                >
+                    восстановить
+                </v-btn>
+                </v-card-actions>
+            </v-card>
+            </v-dialog>
         </v-col>
     </div>
 </template>
@@ -300,6 +525,10 @@ export default {
     middleware: 'eduCheckAuth',
     data() {
         return {
+            trashBtnTitle: "Корзина",
+            trashBtnColor: "error",
+
+
             // данные курсов на добавление
             isAddCurse: false,
             addCurseTitle: "",
@@ -319,9 +548,26 @@ export default {
 
             // данные курсов на редактирование
             isEditCurse: false,
+            editCurseId: "",
+            editCurseTitle: "",
+            editCurseProgram: "",
+            editCurseTown: "",
+            editCurseAddress: "",
+            editCurseLector: "",
+            editCurseDateStart: "",
+            editCurseDateEnd: "",
+            editCursePrice: "",
+            editCurseScore: "",
+            editCurseImage: "",
+            editCurseImagePreview: "",
+            editCurseUniqueSuffix: "",
+            editCurseCategories: [],
+
 
             // данные курсов на удаление
             isDeleteCurse: false,
+            deleteCurseId: "",
+            deleteCurseTitle: "",
 
             showCategories: false,
 
@@ -382,6 +628,9 @@ export default {
                 },
             ],
             curseTable: [],
+            trashTable: [],
+            showTrash: false,
+            showEditInTrashError: false,
             searchCurse: "",
 
             categoryHeaders: [
@@ -453,13 +702,130 @@ export default {
             this.isAddCurse = false
         },
 
-        toEditCurse(curse) {},
-        confirmEditCurse() {},
-        cancelEditCurse() {},
+        toEditCurse(curse) {
+            if (!this.isShowEditInTrashError) {
+                this.isEditCurse = true
 
-        toDeleteCurse(curse) {},
-        confirmDeleteCurse() {},
-        cancelDeleteCurse() {},
+                this.editCurseId = curse.curse_id
+                this.editCurseTitle = curse.title
+                this.editCurseProgram = curse.program
+                this.editCurseTown = curse.town
+                this.editCurseAddress = curse.address
+                this.editCurseLector = curse.lector
+                this.editCurseDateStart = curse.date_start
+                this.editCurseDateEnd = curse.date_end
+                this.editCursePrice = curse.price
+                this.editCurseScore = curse.score
+                this.editCurseImage = null
+                this.editCurseImagePreview = curse.image
+                this.editCurseUniqueSuffix = ""
+            } else {
+                this.showEditInTrashError = true
+                this.editCurseId = curse.curse_id
+            }
+        },
+        async confirmEditCurse() {
+            let formData = new FormData()
+
+            formData.append('curse_id', this.editCurseId)
+            formData.append('title', this.editCurseTitle)
+            formData.append('program', this.editCurseProgram)
+            formData.append('town', this.editCurseTown)
+            formData.append('address', this.editCurseAddress)
+            formData.append('lector', this.editCurseLector)
+            formData.append('date_start', this.editCurseDateStart)
+            formData.append('date_end', this.editCurseDateEnd)
+            formData.append('price', this.editCursePrice)
+            formData.append('score', this.editCurseScore)
+            formData.append('categories', JSON.stringify(this.editCurseCategories))
+            formData.append('uniqueSuffix', this.editCurseUniqueSuffix)
+            formData.append('image', this.editCurseImage, this.editCurseImage.name)
+            
+            await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/curses/edit`, {
+                method: "PUT",
+                headers: {
+                    // 'Content-Type': 'multipart/form-data;boundary=MyBoundary'
+                    // 'Content-Type': 'application/json;charset=utf-8'
+                },
+                body: formData
+            })
+            this.getAllData()
+
+            this.isEditCurse = false
+            this.showEditInTrashError = false
+        },
+        cancelEditCurse() {
+            this.editCurseTitle = ""
+            this.editCurseProgram = ""
+            this.editCurseTown = ""
+            this.editCurseAddress = ""
+            this.editCurseLector = ""
+            this.editCurseDateStart = ""
+            this.editCurseDateEnd = ""
+            this.editCursePrice = null
+            this.editCurseScore = ""
+            this.editCurseImage = ""
+            this.editCurseImagePreview = ""
+            this.editCurseUniqueSuffix = ""
+
+            this.isAddCurse = false
+        },
+
+        toDeleteCurse(curse) {
+            this.isDeleteCurse = true
+
+            this.deleteCurseId = curse.curse_id
+            this.deleteCurseTitle = curse.title
+        },
+        async confirmDeleteCurse() {
+            if (!this.showTrash) {
+                await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/curses/trash`, {
+                    method: "DELETE",
+                    headers: {
+                        'Content-Type': 'application/json;charset=utf-8'
+                    },
+                    body: JSON.stringify({
+                        curse_id: this.deleteCurseId
+                    })
+                })
+                this.getAllData()
+                this.isDeleteCurse = false
+            } else {
+                await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/curses`, {
+                    method: "DELETE",
+                    headers: {
+                        'Content-Type': 'application/json;charset=utf-8'
+                    },
+                    body: JSON.stringify({
+                        curse_id: this.deleteCurseId
+                    })
+                })
+                this.getAllData()
+                this.isDeleteCurse = false
+            }
+        },
+        cancelDeleteCurse() {
+            this.isDeleteCurse = false
+            this.deleteCurseId = ""
+            this.deleteCurseTitle = ""
+        },
+        async confirmReestablishCurse() {
+            await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/curses/reestablish`, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8'
+                },
+                body: JSON.stringify({
+                    curse_id: this.editCurseId
+                })
+            })
+
+            this.showEditInTrashError = false
+            this.getAllData()
+        },
+        cancelReestablishCurse() {
+            this.showEditInTrashError = false
+        },
 
         doCategory() {
             this.showCategories = true
@@ -484,6 +850,7 @@ export default {
             const data = await result.json()
             this.curseTable = data.curses
             this.categoryTable = data.categories
+            this.trashTable = data.trashedCurses
 
             this.categoryTable.forEach(cat => {
                 this.categories.push(cat.title)
@@ -496,10 +863,31 @@ export default {
             this.addCurseUniqueSuffix = uuidv4()
 
             this.addCurseImagePreview = URL.createObjectURL(filename[0])
+        },
+        fileUploadEdit() {
+            const filename = this.$refs.imageCurseEdit.$refs.input.files
+            this.editCurseImage = filename[0]
+            this.editCurseUniqueSuffix = uuidv4()
+
+            this.editCurseImagePreview = URL.createObjectURL(filename[0])
         }
     },
     beforeMount() {
         this.getAllData()
+    },
+    computed: {
+        dataTableItems() {
+            if(this.showTrash) {
+                this.isShowEditInTrashError = true
+                this.trashBtnColor = 'success'
+                this.trashBtnTitle = 'Курсы'
+                return this.trashTable
+            }
+            this.isShowEditInTrashError = false
+            this.trashBtnColor = 'error'
+            this.trashBtnTitle = 'Корзина'
+            return this.curseTable
+        }
     }
 }
 </script>
