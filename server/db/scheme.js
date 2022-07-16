@@ -213,7 +213,7 @@ category.belongsToMany(curse, {through: "curseCategory"})
 educationalCenter.belongsToMany(category, {through: "ECCategory"})
 category.belongsToMany(educationalCenter, {through: "ECCategory"})
 
-const curseStatus = sequelize.define('curse_status', {
+const status = sequelize.define('status', {
     curse_status_id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
@@ -225,8 +225,8 @@ const curseStatus = sequelize.define('curse_status', {
         allowNull: false,
     },
 }, {timestamps: false})
-curse.belongsToMany(curseStatus, {through: "curseCurseStatus"})
-curseStatus.belongsToMany(curse, {through: "curseCurseStatus"})
+curse.belongsToMany(status, {through: "curseCurseStatus"})
+status.belongsToMany(curse, {through: "curseCurseStatus"})
 
 const moderation = sequelize.define('moderation', {
     moderation_id: {
@@ -252,7 +252,7 @@ module.exports = {
     dbBaseSetting,
     DataTypes,
     sequelize,
-    curseStatus,
+    status,
     category,
     doctor,
     curse,

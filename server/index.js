@@ -16,7 +16,6 @@ const storage = multer.diskStorage({
         cb(null, `${req.body.uniqueSuffix}.${extension}`)
     }
 })
-console.log(storage)
 const upload = multer({ dest: 'uploads/', storage: storage  })
 
 const app = express()

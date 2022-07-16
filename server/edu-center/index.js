@@ -1,5 +1,5 @@
 module.exports = function(app, upload) {
-    const { educationalCenter, moderation, articles, rubrics, curse, category, curseStatus } = require('../db/scheme')
+    const { educationalCenter, moderation, articles, rubrics, curse, category, status } = require('../db/scheme')
     const fs = require('fs')
     const baseSettings = require('../config/serverSetting')
     // не articles.create({}), educationalCenter.addArticle()
@@ -147,35 +147,63 @@ module.exports = function(app, upload) {
             image: imageSrc,
         })
 
+        const publicStatus = await status.findOne({
+            where: {
+                title: "public"
+            }
+        })
+
+        await aCurse.addStatus(publicStatus)
+
         res.json({aCurse})
     })
 
     app.put('/edu-center/curses/edit', upload.single('image'), async (req, res) => {
-        let arr = req.file.originalname.split('.')
-        const extension = arr.slice(-1)[0]
+        let aCurse = null
 
-        const imageSrc = `/uploads/${req.body.uniqueSuffix}.${extension}`
+        if(req.file) {
+            let arr = req.file.originalname.split('.')
+            const extension = arr.slice(-1)[0]
 
-        const image = await curse.findOne({where: {curse_id: req.body.curse_id}})
+            const imageSrc = `/uploads/${req.body.uniqueSuffix}.${extension}`
 
-        fs.unlink(`../static${image.image}`, (err) => {console.log(err)})
+            const image = await curse.findOne({where: {curse_id: req.body.curse_id}})
 
-        const aCurse = await curse.update({
-            title: req.body.title,
-            program: req.body.program,
-            town: req.body.town,
-            address: req.body.address,
-            lector: req.body.lector,
-            date_start: req.body.date_start,
-            date_end: req.body.date_end,
-            price: req.body.price,
-            score: req.body.score,
-            image: imageSrc,
-        }, {
-            where: {
-                curse_id: req.body.curse_id
-            }
-        })
+            fs.unlink(`../static${image.image}`, (err) => {console.log(err)})
+
+            aCurse = await curse.update({
+                title: req.body.title,
+                program: req.body.program,
+                town: req.body.town,
+                address: req.body.address,
+                lector: req.body.lector,
+                date_start: req.body.date_start,
+                date_end: req.body.date_end,
+                price: req.body.price,
+                score: req.body.score,
+                image: imageSrc,
+            }, {
+                where: {
+                    curse_id: req.body.curse_id
+                }
+            })
+        } else {
+            aCurse = await curse.update({
+                title: req.body.title,
+                program: req.body.program,
+                town: req.body.town,
+                address: req.body.address,
+                lector: req.body.lector,
+                date_start: req.body.date_start,
+                date_end: req.body.date_end,
+                price: req.body.price,
+                score: req.body.score,
+            }, {
+                where: {
+                    curse_id: req.body.curse_id
+                }
+            })
+        }
 
         res.json({aCurse})
     })
@@ -186,18 +214,23 @@ module.exports = function(app, upload) {
                 curse_id: req.body.curse_id
             }
         })
-        const trash = await curseStatus.findOne({
+        const trash = await status.findOne({
             where: {
                 title: "trashed"
             }
         })
+        await aCurse.setStatuses(null)
 
-        await trash.addCurse(aCurse)
+        await aCurse.addStatus(trash)
 
         res.json({ok: true})
     })
 
     app.delete('/edu-center/curses', async (req, res) => {
+        const image = await curse.findOne({where: {curse_id: req.body.curse_id}})
+
+        fs.unlink(`../static${image.image}`, (err) => {console.log(err)})
+
         await curse.destroy({
             where: {
                 curse_id: req.body.curse_id
@@ -208,9 +241,9 @@ module.exports = function(app, upload) {
     })
     
     app.post('/edu-center/curses/reestablish', async (req, res) => {
-        const trash = await curseStatus.findOne({
+        const publicStatus = await status.findOne({
             where: {
-                title: "trashed"
+                title: "public"
             }
         })
         const aCurse = await curse.findOne({
@@ -218,35 +251,90 @@ module.exports = function(app, upload) {
                 curse_id: req.body.curse_id
             }
         })
-        await trash.removeCurse(aCurse)
+        await aCurse.setStatuses(null)
+        
+        await aCurse.addStatus(publicStatus)
 
         res.json({ok: true})
     })
 
     app.get('/edu-center/curses', async (req, res) => {
-        const curses = await curse.findAll({raw: true})
         const categories = await category.findAll()
-        const trash = await curseStatus.findOne({
+        const trash = await status.findOne({
             where: {
                 title: "trashed"
             }
         })
+        const publicStatus = await status.findOne({
+            where: {
+                title: "public"
+            }
+        })
+        
         const trashedCurses = await trash.getCurses()
-        console.log(trashedCurses)
+        const publicCurses = await publicStatus.getCurses()
 
-        let resultCurses = []
-        curses.forEach(cur => {
-            trashedCurses.forEach(tc => {
-                if (tc.curse_id != cur.curse_id) {
-                    resultCurses.push(cur)
+        res.json({trashedCurses, categories, curses: publicCurses})
+    })
+
+    app.post('/edu-center/curses/category/add', upload.single('image'), async (req, res) => {
+        let arr = req.file.originalname.split('.')
+        const extension = arr.slice(-1)[0]
+
+        const imageSrc = `/uploads/${req.body.uniqueSuffix}.${extension}`
+        
+        const aCategory = await category.create({
+            title: req.body.title,
+            image: imageSrc
+        })
+
+        res.json({aCategory})
+    })
+
+    app.put('/edu-center/curses/category/edit', upload.single('image'), async (req, res) => {
+        if(req.file) {
+            let arr = req.file.originalname.split('.')
+            const extension = arr.slice(-1)[0]
+
+            const imageSrc = `/uploads/${req.body.uniqueSuffix}.${extension}`
+
+            const image = await category.findOne({where: {category_id: req.body.category_id}})
+
+            fs.unlink(`../static${image.image}`, (err) => {console.log(err)})
+            
+            await category.update({
+                title: req.body.title,
+                image: imageSrc
+            }, {
+                where: {
+                    category_id: req.body.category_id
                 }
             })
-        })
-        if (!trashedCurses.length) {
-            resultCurses = curses
+        } else {
+            await category.update({
+                title: req.body.title,
+            }, {
+                where: {
+                    category_id: req.body.category_id
+                }
+            })
         }
+        
+        res.json({ok: true})
+    })
 
-        res.json({trashedCurses, categories, curses: resultCurses})
+    app.delete('/edu-center/curses/category', async (req, res) => {
+        const image = await category.findOne({where: {category_id: req.body.category_id}})
+
+        fs.unlink(`../static${image.image}`, (err) => {console.log(err)})
+
+        await category.destroy({
+            where: {
+                category_id: req.body.category_id
+            }
+        })
+
+        res.json({ok: true})
     })
 
     app.post('/edu/login', async (req, res) => {

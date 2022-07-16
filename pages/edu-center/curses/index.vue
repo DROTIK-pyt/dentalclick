@@ -398,58 +398,214 @@
             </v-dialog>
             <v-dialog
             v-model="showCategories"
-            fullscreen
-            hide-overlay
+            max-width="550"
             transition="dialog-bottom-transition"
             >
             <v-card>
-                <v-toolbar
-                dark
-                color="primary"
-                >
-                <v-btn
-                    icon
-                    dark
-                    @click="showCategories = false"
-                >
-                    <v-icon>mdi-close</v-icon>
-                </v-btn>
-                <v-toolbar-title>Все категории</v-toolbar-title>
-                <v-spacer></v-spacer>
-                </v-toolbar>
                 <v-list
                 three-line
                 subheader
                 >
                 <v-list-item>
                     <v-list-item-content>
-                    
+                        <v-data-table
+                            :headers="categoryHeaders"
+                            :items="categoryTable"
+                            sort-by="calories"
+                            class="elevation-1"
+                        >
+                            <template v-slot:top>
+                            <v-toolbar
+                                flat
+                            >
+                                <v-toolbar-title>Категории</v-toolbar-title>
+                                <v-divider
+                                class="mx-4"
+                                inset
+                                vertical
+                                ></v-divider>
+                                <v-spacer></v-spacer>
+                                <v-btn
+                                tile
+                                color="success"
+                                @click="toAddCategory"
+                                >
+                                <v-icon left>
+                                    mdi-plus
+                                </v-icon>
+                                Добавить
+                                </v-btn>
+                            </v-toolbar>
+                            </template>
+                            <template v-slot:item.actions="{ item }">
+                            <v-icon
+                                small
+                                class="mr-2"
+                                @click="toEditCategory(item)"
+                            >
+                                mdi-pencil
+                            </v-icon>
+                            <v-icon
+                                small
+                                @click="toDeleteCategory(item)"
+                            >
+                                mdi-delete
+                            </v-icon>
+                            </template>
+                        </v-data-table>
                     </v-list-item-content>
                 </v-list-item>
                 </v-list>
             </v-card>
+                <v-dialog
+                v-model="isDeleteCategory"
+                persistent
+                max-width="290"
+                >
+                <v-card>
+                    <v-card-title class="text-h5">
+                    Удалить {{ deleteCategoryTitle }}?
+                    </v-card-title>
+                    <v-card-text>Категория будет безвозвратно удалена.</v-card-text>
+                    <v-card-actions>
+                    <v-spacer></v-spacer>
+                    <v-btn
+                        color="red darken-1"
+                        text
+                        @click="cancelDeleteCategory"
+                    >
+                        Отмена
+                    </v-btn>
+                    <v-btn
+                        color="green darken-1"
+                        text
+                        @click="confirmDeleteCategory"
+                    >
+                        Хорошо
+                    </v-btn>
+                    </v-card-actions>
+                </v-card>
+                </v-dialog>
+                <v-dialog
+                    v-model="isAddCategory"
+                    transition="dialog-bottom-transition"
+                    max-width="600"
+                >
+                    <template>
+                        <v-card>
+                            <v-toolbar
+                                flat
+                                color="primary"
+                                dark
+                            >
+                                <v-toolbar-title>Новая категория</v-toolbar-title>
+                                <v-divider
+                                class="mx-4"
+                                inset
+                                vertical
+                                ></v-divider>
+                                <v-spacer></v-spacer>
+                                <v-btn
+                                tile
+                                @click="confirmAddCategory"
+                                class="mr-8"
+                                >
+                                <v-icon left>
+                                    mdi-plus
+                                </v-icon>
+                                Добавить
+                                </v-btn>
+                                <v-btn
+                                tile
+                                @click="cancelAddCategory"
+                                color="error"
+                                >
+                                <v-icon left>
+                                    mdi-trash-can
+                                </v-icon>
+                                Отмена
+                                </v-btn>
+                            </v-toolbar>
+                            <v-textarea
+                            class="ma-7"
+                            label="Название"
+                            rows="1"
+                            v-model="addCategoryTitle"
+                            ></v-textarea>
+                            <v-col
+                            cols="12"
+                            sm="5"
+                            >
+                                <v-file-input
+                                ref="imageCategoryAdd"
+                                @change="imageUploadCategory"
+                                label="Картинка Категории"
+                                accept="image/*"
+                                ></v-file-input>
+                            </v-col>
+                            <v-col
+                            cols="12"
+                            sm="7"
+                            >
+                                <v-img
+                                v-if="addCategoryImagePreview"
+                                max-height="178"
+                                max-width="284"
+                                :src="addCategoryImagePreview"
+                                ></v-img>
+                            </v-col>
+                        </v-card>
+                    </template>
+                </v-dialog>
             </v-dialog>
             <v-dialog
                 transition="dialog-bottom-transition"
                 max-width="600"
-                v-model="isAddCategory"
+                v-model="isEditCategory"
             >
                 <v-card>
                     <v-toolbar
                     color="primary"
                     dark
-                    >Добавить категорию</v-toolbar>
+                    >Редактирование категории</v-toolbar>
                     <v-card-text>
-                        
+                        <v-textarea
+                            class="ma-7"
+                            label="Название"
+                            rows="1"
+                            v-model="editCategoryTitle"
+                            ></v-textarea>
+                            <v-col
+                            cols="12"
+                            sm="5"
+                            >
+                                <v-file-input
+                                ref="imageCategoryEdit"
+                                @change="imageUploadCategoryEdit"
+                                label="Картинка Категории"
+                                accept="image/*"
+                                ></v-file-input>
+                            </v-col>
+                            <v-col
+                            cols="12"
+                            sm="7"
+                            >
+                                <v-img
+                                v-if="editCategoryImagePreview"
+                                max-height="178"
+                                max-width="284"
+                                :src="editCategoryImagePreview"
+                                ></v-img>
+                            </v-col>
                     </v-card-text>
                     <v-card-actions class="justify-end">
                     <v-btn
                         text
-                        @click="confirmAddCategory"
-                    >Добавить</v-btn>
+                        @click="confirmEditCategory"
+                    >Применить</v-btn>
                     <v-btn
                         text
-                        @click="cancelAddCategory"
+                        @click="cancelEditCategory"
                     >Отмена</v-btn>
                     </v-card-actions>
                 </v-card>
@@ -463,7 +619,7 @@
                 <v-card-title class="text-h5">
                 Удалить {{ deleteCurseTitle }}?
                 </v-card-title>
-                <v-card-text>Курс будет перемещен в корзину</v-card-text>
+                <v-card-text>Курс будет удален</v-card-text>
                 <v-card-actions>
                 <v-spacer></v-spacer>
                 <v-btn
@@ -575,13 +731,20 @@ export default {
             isAddCategory: false,
             addCategoryTitle: "",
             addCategoryImage: "",
+            addCategoryImagePreview: "",
             addCategoryUniqueSuffix: "",
 
             // данные категорий на редактирование
             isEditCategory: false,
+            editCategoryId: "",
+            editCategoryTitle: "",
+            editCategoryImage: "",
+            editCategoryImagePreview: "",
 
             // данные категорий на удаление
             isDeleteCategory: false,
+            deleteCategoryTitle: "",
+            deleteCategoryId: "",
 
             curseHeaders: [
                 {
@@ -642,7 +805,7 @@ export default {
                 },
                 {
                     text: 'Действия',
-                    align: 'start',
+                    align: 'end',
                     sortable: false,
                     value: 'actions',
                 },
@@ -739,7 +902,8 @@ export default {
             formData.append('score', this.editCurseScore)
             formData.append('categories', JSON.stringify(this.editCurseCategories))
             formData.append('uniqueSuffix', this.editCurseUniqueSuffix)
-            formData.append('image', this.editCurseImage, this.editCurseImage.name)
+            if(!!this.editCurseImage)
+                formData.append('image', this.editCurseImage, this.editCurseImage.name)
             
             await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/curses/edit`, {
                 method: "PUT",
@@ -768,7 +932,7 @@ export default {
             this.editCurseImagePreview = ""
             this.editCurseUniqueSuffix = ""
 
-            this.isAddCurse = false
+            this.isEditCurse = false
         },
 
         toDeleteCurse(curse) {
@@ -833,17 +997,98 @@ export default {
 
         toAddCategory() {
             this.isAddCategory = true
+            this.addCategoryUniqueSuffix = uuidv4()
         },
-        confirmAddCategory() {},
-        cancelAddCategory() {},
+        async confirmAddCategory() {
+            let formData = new FormData()
 
-        toEditCategory(category) {},
-        confirmEditCategory() {},
-        cancelEditCategory() {},
+            formData.append('title', this.addCategoryTitle)
+            formData.append('uniqueSuffix', this.addCategoryUniqueSuffix)
+            formData.append('image', this.addCategoryImage, this.addCategoryImage.name)
 
-        toDeleteCategory(category) {},
-        confirmDeleteCategory() {},
-        cancelDeleteCategory() {},
+            const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/curses/category/add`, {
+                method: "POST",
+                headers: {
+                    // 'Content-Type': 'multipart/form-data;boundary=MyBoundary'
+                    // 'Content-Type': 'application/json;charset=utf-8'
+                },
+                body: formData
+            })
+
+            const data = await result.json()
+            this.categoryTable.push(data.aCategory)
+            this.categories.push(data.aCategory.title)
+
+            this.isAddCategory = false
+        },
+        cancelAddCategory() {
+            this.isAddCategory = false
+        },
+
+        toEditCategory(category) {
+            this.isEditCategory = true
+
+            this.editCategoryId = category.category_id
+            this.editCategoryImagePreview = category.image
+            this.editCategoryTitle = category.title
+            this.editCategoryUniqueSuffix = uuidv4()
+        },
+        async confirmEditCategory() {
+            let formData = new FormData()
+
+            formData.append('title', this.editCategoryTitle)
+            formData.append('uniqueSuffix', this.editCategoryUniqueSuffix)
+            formData.append('category_id', this.editCategoryId)
+            if(!!this.editCategoryImage) {
+                formData.append('image', this.editCategoryImage, this.editCategoryImage.name)
+            }
+
+            await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/curses/category/edit`, {
+                method: "PUT",
+                headers: {
+                    // 'Content-Type': 'multipart/form-data;boundary=MyBoundary'
+                    // 'Content-Type': 'application/json;charset=utf-8'
+                },
+                body: formData
+            })
+            this.getAllData()
+
+            this.isEditCategory = false
+        },
+        cancelEditCategory() {
+            this.isEditCategory = false
+
+            this.editCategoryId = ""
+            this.editCategoryImagePreview = ""
+            this.editCategoryTitle = ""
+        },
+
+        toDeleteCategory(category) {
+            this.isDeleteCategory = true
+
+            this.deleteCategoryTitle = category.title
+            this.deleteCategoryId = category.category_id
+        },
+        async confirmDeleteCategory() {
+            await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/curses/category`, {
+                method: "DELETE", 
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8'
+                },
+                body: JSON.stringify({
+                    category_id: this.deleteCategoryId
+                })
+            })
+
+            this.getAllData()
+            this.isDeleteCategory = false
+        },
+        cancelDeleteCategory() {
+            this.isDeleteCategory = false
+
+            this.deleteCategoryTitle = ""
+            this.deleteCategoryId = ""
+        },
 
         async getAllData() {
             const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/curses`)
@@ -852,6 +1097,7 @@ export default {
             this.categoryTable = data.categories
             this.trashTable = data.trashedCurses
 
+            this.categories = []
             this.categoryTable.forEach(cat => {
                 this.categories.push(cat.title)
             })
@@ -870,6 +1116,19 @@ export default {
             this.editCurseUniqueSuffix = uuidv4()
 
             this.editCurseImagePreview = URL.createObjectURL(filename[0])
+        },
+        imageUploadCategory() {
+            const filename = this.$refs.imageCategoryAdd.$refs.input.files
+            this.addCategoryImage = filename[0]
+            console.log(this.addCategoryImage)
+
+            this.addCategoryImagePreview = URL.createObjectURL(filename[0])
+        },
+        imageUploadCategoryEdit() {
+            const filename = this.$refs.imageCategoryEdit.$refs.input.files
+            this.editCategoryImage = filename[0]
+
+            this.editCategoryImagePreview = URL.createObjectURL(filename[0])
         }
     },
     beforeMount() {
