@@ -11,7 +11,7 @@
                     ></v-img>
                 </nuxt-link>
             </v-col>
-            <v-col class="right d-flex justify-space-between align-center" cols="12" sm="5" offset-sm="4" tag="ul">
+            <v-col class="right d-flex justify-space-between align-center" cols="12" sm="9" lg="5" offset-lg="4" tag="ul">
                 <nuxt-link class="header-link text-h6" to="curses">Мои курсы</nuxt-link>
                 <nuxt-link class="header-link text-h6" to="reports">Мои отчеты</nuxt-link>
                 <nuxt-link class="header-link text-h6" to="blog">Мой блог</nuxt-link>

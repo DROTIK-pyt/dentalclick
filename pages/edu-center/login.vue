@@ -52,7 +52,7 @@ export default {
     },
     methods: {
         async loginEdu() {
-            const response = await fetch("http://localhost:8888/edu/login", {
+            const response = await fetch("http://localhost:8888/edu-center/login", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

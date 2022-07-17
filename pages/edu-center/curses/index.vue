@@ -2,7 +2,9 @@
     <div>
         <v-col
         cols="12"
-        sm="9"
+        sm="12"
+        md="12"
+        lg="10"
         >
             <v-data-table
                 :headers="curseHeaders"
@@ -14,58 +16,71 @@
                 <template v-slot:top>
                 <v-toolbar
                     flat
+                    height="100"
                 >
                     <v-toolbar-title>Курсы</v-toolbar-title>
                     <v-divider
-                    class="mx-4"
+                    class="mx-2"
                     inset
                     vertical
                     ></v-divider>
                     <v-spacer></v-spacer>
-                    <v-text-field
-                        v-model="searchCurse"
-                        append-icon="mdi-magnify"
-                        label="Поиск.."
-                        single-line
-                        hide-details
-                    ></v-text-field>
-                    <v-divider
-                    class="mx-6"
-                    inset
-                    vertical
-                    ></v-divider>
-                    <v-btn
-                    tile
-                    color="primary"
-                    class="mr-5"
-                    @click="toAddCurse"
-                    >
-                    <v-icon left>
-                        mdi-plus
-                    </v-icon>
-                    Добавить курс
-                    </v-btn>
-                    <v-btn
-                    tile
-                    color="primary"
-                    class="mr-5"
-                    @click="doCategory"
-                    >
-                    <v-icon left>
-                        mdi-table
-                    </v-icon>
-                    Категории
-                    </v-btn>
-                    <v-btn
-                    tile
-                    :color="trashBtnColor"
-                    @click="showTrash = !showTrash"
-                    >
-                    <v-icon left>
-                        mdi-trash-can
-                    </v-icon>
-                    {{ trashBtnTitle }}
-                    </v-btn>
+                    <v-row>
+                        <v-col
+                        cols="12"
+                        md="3"
+                        >
+                        <v-text-field
+                            v-model="searchCurse"
+                            append-icon="mdi-magnify"
+                            label="Поиск.."
+                            single-line
+                            hide-details
+                        ></v-text-field>
+                        </v-col>
+                        <v-divider
+                        class="mx-2"
+                        inset
+                        vertical
+                        ></v-divider>
+                        <v-col
+                        cols="12"
+                        md="8"
+                        >
+                            <v-btn
+                            tile
+                            color="primary"
+                            class="mr-1"
+                            @click="toAddCurse"
+                            >
+                            <v-icon left>
+                                mdi-plus
+                            </v-icon>
+                            Добавить курс
+                            </v-btn>
+                            <v-btn
+                            tile
+                            color="primary"
+                            class="mr-1"
+                            @click="doCategory"
+                            >
+                            <v-icon left>
+                                mdi-table
+                            </v-icon>
+                            Категории
+                            </v-btn>
+                            <v-btn
+                            tile
+                            :color="trashBtnColor"
+                            @click="showTrash = !showTrash"
+                            >
+                            <v-icon left>
+                                mdi-trash-can
+                            </v-icon>
+                            {{ trashBtnTitle }}
+                            </v-btn>
+                        </v-col>
+                    </v-row>
                 </v-toolbar>
                 </template>
                 <template v-slot:item.actions="{ item }">
@@ -119,124 +134,138 @@
                     subheader
                     >
                     <v-subheader>Данные курса</v-subheader>
-                    <v-list-item>
-                        <v-list-item-content>
-                        <v-text-field
-                            label="Название"
-                            v-model="addCurseTitle"
-                        ></v-text-field>
-                        </v-list-item-content>
-                    </v-list-item>
-                    <v-list-item>
-                        <v-textarea
-                        name="input-7-1"
-                        label="Программа курса"
-                        rows="5"
-                        row-height="20"
-                        v-model="addCurseProgram"
-                        ></v-textarea>
-                    </v-list-item>
-                    <v-list-item>
-                        <v-list-item-content>
-                        <v-text-field
-                            label="Город проведения"
-                            v-model="addCurseTown"
-                        ></v-text-field>
-                        </v-list-item-content>
-                    </v-list-item>
-                    <v-list-item>
-                        <v-list-item-content>
-                        <v-text-field
-                            label="Адрес проведения"
-                            v-model="addCurseAddress"
-                        ></v-text-field>
-                        </v-list-item-content>
-                    </v-list-item>
-                    <v-list-item>
-                        <v-list-item-content>
-                        <v-text-field
-                            label="ФИО лектора(ов)"
-                            v-model="addCurseLector"
-                        ></v-text-field>
-                        </v-list-item-content>
-                    </v-list-item>
-                    <v-list-item>
-                        <v-list-item-content>
-                        <v-col
-                        cols="12"
-                        sm="3"
-                        >
-                        <span>Дата начала</span><br>
-                        <br><v-date-picker v-model="addCurseDateStart"></v-date-picker>
-                        </v-col>
-                        </v-list-item-content>
-                    </v-list-item>
-                    <v-list-item>
-                        <v-list-item-content>
-                        <v-col
-                        cols="12"
-                        sm="3"
-                        >
-                        <span>Дата окончания</span><br>
-                        <br><v-date-picker v-model="addCurseDateEnd"></v-date-picker>
-                        </v-col>
-                        </v-list-item-content>
-                    </v-list-item>
-                    <v-list-item>
-                        <v-list-item-content>
-                        <v-text-field
-                            label="Цена"
-                            v-model="addCursePrice"
-                        ></v-text-field>
-                        </v-list-item-content>
-                    </v-list-item>
-                    <v-list-item>
-                        <v-list-item-content>
-                        <v-text-field
-                            label="Баллы"
-                            v-model="addCurseScore"
-                        ></v-text-field>
-                        </v-list-item-content>
-                    </v-list-item>
-                    <v-list-item>
+                    <v-row class="ma-0">
                         <v-col
                         cols="12"
                         sm="7"
                         >
-                            <v-select
-                                v-model="addCurseCategories"
-                                :items="categories"
-                                attach
-                                chips
-                                label="Категории"
-                                multiple
-                            ></v-select>
+                            <v-list-item>
+                                <v-list-item-content>
+                                <v-text-field
+                                    label="Название"
+                                    v-model="addCurseTitle"
+                                ></v-text-field>
+                                </v-list-item-content>
+                            </v-list-item>
+                            <v-list-item>
+                                <v-textarea
+                                name="input-7-1"
+                                label="Программа курса"
+                                rows="5"
+                                row-height="20"
+                                v-model="addCurseProgram"
+                                ></v-textarea>
+                            </v-list-item>
+                            <v-row>
+                                <v-col
+                                cols="12"
+                                sm="6"
+                                >
+                                    <v-list-item>
+                                        <v-list-item-content>
+                                        <span>Дата начала</span><br>
+                                        <br><v-date-picker v-model="addCurseDateStart"></v-date-picker>
+                                        </v-list-item-content>
+                                    </v-list-item>
+                                </v-col>
+                                <v-col
+                                cols="12"
+                                sm="6"
+                                >
+                                    <v-list-item>
+                                        <v-list-item-content>
+                                        <span>Дата окончания</span><br>
+                                        <br><v-date-picker v-model="addCurseDateEnd"></v-date-picker>
+                                        </v-list-item-content>
+                                    </v-list-item>
+                                </v-col>
+                            </v-row>
                         </v-col>
-                    </v-list-item>
-                    <v-list-item>
                         <v-col
                         cols="12"
-                        sm="3"
+                        sm="5"
                         >
-                            <v-file-input
-                            ref="imageCurse"
-                            @change="fileUpload"
-                            label="Картинка курса"
-                            accept="image/*"
-                            ></v-file-input>
+                            <v-list-item>
+                                <v-list-item-content>
+                                <v-text-field
+                                    label="Город проведения"
+                                    v-model="addCurseTown"
+                                ></v-text-field>
+                                </v-list-item-content>
+                            </v-list-item>
+                            <v-list-item>
+                                <v-list-item-content>
+                                <v-text-field
+                                    label="Адрес проведения"
+                                    v-model="addCurseAddress"
+                                ></v-text-field>
+                                </v-list-item-content>
+                            </v-list-item>
+                            <v-list-item>
+                                <v-list-item-content>
+                                <v-text-field
+                                    label="ФИО лектора(ов)"
+                                    v-model="addCurseLector"
+                                ></v-text-field>
+                                </v-list-item-content>
+                            </v-list-item>
+                            <v-list-item>
+                                <v-list-item-content>
+                                <v-text-field
+                                    label="Цена"
+                                    v-model="addCursePrice"
+                                ></v-text-field>
+                                </v-list-item-content>
+                            </v-list-item>
+                            <v-list-item>
+                                <v-list-item-content>
+                                <v-text-field
+                                    label="Баллы"
+                                    v-model="addCurseScore"
+                                ></v-text-field>
+                                </v-list-item-content>
+                            </v-list-item>
+                            <v-list-item>
+                                <v-col
+                                cols="12"
+                                sm="7"
+                                >
+                                    <v-select
+                                        v-model="addCurseCategories"
+                                        :items="categories"
+                                        attach
+                                        chips
+                                        label="Категории"
+                                        multiple
+                                    ></v-select>
+                                </v-col>
+                            </v-list-item>
+                            <v-list-item>
+                                <v-col
+                                cols="12"
+                                sm="3"
+                                >
+                                    <v-file-input
+                                    ref="imageCurse"
+                                    @change="fileUpload"
+                                    label="Превью"
+                                    accept="image/*"
+                                    ></v-file-input>
+                                </v-col>
+                                <v-col
+                                cols="12"
+                                sm="9"
+                                >
+                                <v-img
+                                v-if="addCurseImagePreview"
+                                max-height="178"
+                                max-width="284"
+                                :src="addCurseImagePreview"
+                                ></v-img>
+                                </v-col>
+                            </v-list-item>
                         </v-col>
-                        <v-col
-                        cols="12"
-                        sm="9"
-                        >
-                        <v-img
-                        v-if="addCurseImagePreview"
-                        max-height="178"
-                        max-width="284"
-                        :src="addCurseImagePreview"
-                        ></v-img>
-                        </v-col>
-                    </v-list-item>
+                    </v-row>
                     </v-card>
                 </v-card>
             </v-dialog>
@@ -258,7 +287,7 @@
                     >
                         <v-icon>mdi-close</v-icon>
                     </v-btn>
-                    <v-toolbar-title>Редактирование нового курса</v-toolbar-title>
+                    <v-toolbar-title>Редактирование курса</v-toolbar-title>
                     <v-spacer></v-spacer>
                     <v-toolbar-items>
                         <v-btn
@@ -275,124 +304,148 @@
                     subheader
                     >
                     <v-subheader>Данные курса</v-subheader>
-                    <v-list-item>
-                        <v-list-item-content>
-                        <v-text-field
-                            label="Название"
-                            v-model="editCurseTitle"
-                        ></v-text-field>
-                        </v-list-item-content>
-                    </v-list-item>
-                    <v-list-item>
-                        <v-textarea
-                        name="input-7-1"
-                        label="Программа курса"
-                        rows="5"
-                        row-height="20"
-                        v-model="editCurseProgram"
-                        ></v-textarea>
-                    </v-list-item>
-                    <v-list-item>
-                        <v-list-item-content>
-                        <v-text-field
-                            label="Город проведения"
-                            v-model="editCurseTown"
-                        ></v-text-field>
-                        </v-list-item-content>
-                    </v-list-item>
-                    <v-list-item>
-                        <v-list-item-content>
-                        <v-text-field
-                            label="Адрес проведения"
-                            v-model="editCurseAddress"
-                        ></v-text-field>
-                        </v-list-item-content>
-                    </v-list-item>
-                    <v-list-item>
-                        <v-list-item-content>
-                        <v-text-field
-                            label="ФИО лектора(ов)"
-                            v-model="editCurseLector"
-                        ></v-text-field>
-                        </v-list-item-content>
-                    </v-list-item>
-                    <v-list-item>
-                        <v-list-item-content>
-                        <v-col
-                        cols="12"
-                        sm="3"
-                        >
-                        <span>Дата начала</span><br>
-                        <br><v-date-picker v-model="editCurseDateStart"></v-date-picker>
-                        </v-col>
-                        </v-list-item-content>
-                    </v-list-item>
-                    <v-list-item>
-                        <v-list-item-content>
-                        <v-col
-                        cols="12"
-                        sm="3"
-                        >
-                        <span>Дата окончания</span><br>
-                        <br><v-date-picker v-model="editCurseDateEnd"></v-date-picker>
-                        </v-col>
-                        </v-list-item-content>
-                    </v-list-item>
-                    <v-list-item>
-                        <v-list-item-content>
-                        <v-text-field
-                            label="Цена"
-                            v-model="editCursePrice"
-                        ></v-text-field>
-                        </v-list-item-content>
-                    </v-list-item>
-                    <v-list-item>
-                        <v-list-item-content>
-                        <v-text-field
-                            label="Баллы"
-                            v-model="editCurseScore"
-                        ></v-text-field>
-                        </v-list-item-content>
-                    </v-list-item>
-                    <v-list-item>
+                    <v-row class="ma-0">
                         <v-col
                         cols="12"
                         sm="7"
                         >
-                            <v-select
-                                v-model="editCurseCategories"
-                                :items="categories"
-                                attach
-                                chips
-                                label="Категории"
-                                multiple
-                            ></v-select>
+                            <v-list-item>
+                                <v-list-item-content>
+                                <v-text-field
+                                    label="Название"
+                                    v-model="editCurseTitle"
+                                ></v-text-field>
+                                </v-list-item-content>
+                            </v-list-item>
+                            <v-list-item>
+                                <v-textarea
+                                name="input-7-1"
+                                label="Программа курса"
+                                rows="5"
+                                row-height="20"
+                                v-model="editCurseProgram"
+                                ></v-textarea>
+                            </v-list-item>
+                            <v-row>
+                                <v-col
+                                cols="12"
+                                sm="6"
+                                >
+                                    <v-list-item>
+                                        <v-list-item-content>
+                                        <v-col
+                                        cols="12"
+                                        sm="12"
+                                        >
+                                        <span>Дата начала</span><br>
+                                        <br><v-date-picker v-model="editCurseDateStart"></v-date-picker>
+                                        </v-col>
+                                        </v-list-item-content>
+                                    </v-list-item>
+                                </v-col>
+                                <v-col
+                                cols="12"
+                                sm="6"
+                                >
+                                    <v-list-item>
+                                        <v-list-item-content>
+                                        <v-col
+                                        cols="12"
+                                        sm="12"
+                                        >
+                                        <span>Дата окончания</span><br>
+                                        <br><v-date-picker v-model="editCurseDateEnd"></v-date-picker>
+                                        </v-col>
+                                        </v-list-item-content>
+                                    </v-list-item>
+                                </v-col>
+                            </v-row>
                         </v-col>
-                    </v-list-item>
-                    <v-list-item>
                         <v-col
                         cols="12"
-                        sm="3"
+                        sm="4"
                         >
-                            <v-file-input
-                            ref="imageCurseEdit"
-                            @change="fileUploadEdit"
-                            label="Картинка курса"
-                            accept="image/*"
-                            ></v-file-input>
+                        <v-list-item>
+                            <v-list-item-content>
+                            <v-text-field
+                                label="Город проведения"
+                                v-model="editCurseTown"
+                            ></v-text-field>
+                            </v-list-item-content>
+                        </v-list-item>
+                        <v-list-item>
+                            <v-list-item-content>
+                            <v-text-field
+                                label="Адрес проведения"
+                                v-model="editCurseAddress"
+                            ></v-text-field>
+                            </v-list-item-content>
+                        </v-list-item>
+                        <v-list-item>
+                            <v-list-item-content>
+                            <v-text-field
+                                label="ФИО лектора(ов)"
+                                v-model="editCurseLector"
+                            ></v-text-field>
+                            </v-list-item-content>
+                        </v-list-item>
+                        <v-list-item>
+                            <v-list-item-content>
+                            <v-text-field
+                                label="Цена"
+                                v-model="editCursePrice"
+                            ></v-text-field>
+                            </v-list-item-content>
+                        </v-list-item>
+                        <v-list-item>
+                            <v-list-item-content>
+                            <v-text-field
+                                label="Баллы"
+                                v-model="editCurseScore"
+                            ></v-text-field>
+                            </v-list-item-content>
+                        </v-list-item>
+                        <v-list-item>
+                            <v-col
+                            cols="12"
+                            sm="7"
+                            >
+                                <v-select
+                                    v-model="editCurseCategories"
+                                    :items="categories"
+                                    attach
+                                    chips
+                                    label="Категории"
+                                    multiple
+                                ></v-select>
+                            </v-col>
+                        </v-list-item>
+                        <v-list-item>
+                            <v-col
+                            cols="12"
+                            sm="3"
+                            >
+                                <v-file-input
+                                ref="imageCurseEdit"
+                                @change="fileUploadEdit"
+                                label="Превью"
+                                accept="image/*"
+                                ></v-file-input>
+                            </v-col>
+                            <v-col
+                            cols="12"
+                            sm="9"
+                            >
+                            <v-img
+                            v-if="editCurseImagePreview"
+                            max-height="178"
+                            max-width="284"
+                            :src="editCurseImagePreview"
+                            ></v-img>
+                            </v-col>
+                        </v-list-item>
                         </v-col>
-                        <v-col
-                        cols="12"
-                        sm="9"
-                        >
-                        <v-img
-                        v-if="editCurseImagePreview"
-                        max-height="178"
-                        max-width="284"
-                        :src="editCurseImagePreview"
-                        ></v-img>
-                        </v-col>
-                    </v-list-item>
+                        </v-row>
                     </v-card>
                 </v-card>
             </v-dialog>
@@ -692,7 +745,7 @@ export default {
             addCurseTown: "",
             addCurseAddress: "",
             addCurseLector: "",
-            addCurseDateStart: "",
+            addCurseDateStart: new Date(Date.now()).toISOString().substr(0, 10),
             addCurseDateEnd: "",
             addCursePrice: null,
             addCurseScore: "",
@@ -832,6 +885,7 @@ export default {
             formData.append('score', this.addCurseScore)
             formData.append('categories', JSON.stringify(this.addCurseCategories))
             formData.append('uniqueSuffix', this.addCurseUniqueSuffix)
+            formData.append('educational_center_id', this.$store.getters['eduCenter/getId'])
             formData.append('image', this.addCurseImage, this.addCurseImage.name)
             
             const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/curses/add`, {
@@ -865,7 +919,7 @@ export default {
             this.isAddCurse = false
         },
 
-        toEditCurse(curse) {
+        async toEditCurse(curse) {
             if (!this.isShowEditInTrashError) {
                 this.isEditCurse = true
 
@@ -882,6 +936,19 @@ export default {
                 this.editCurseImage = null
                 this.editCurseImagePreview = curse.image
                 this.editCurseUniqueSuffix = ""
+                const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/category`,{
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json;charset=utf-8'
+                    },
+                    body: JSON.stringify({
+                        curse_id: curse.curse_id
+                    })
+                })
+                const data = await result.json()
+                for(const cat of data.categories) {
+                    this.editCurseCategories.push(cat.title)
+                }
             } else {
                 this.showEditInTrashError = true
                 this.editCurseId = curse.curse_id
@@ -1004,6 +1071,7 @@ export default {
 
             formData.append('title', this.addCategoryTitle)
             formData.append('uniqueSuffix', this.addCategoryUniqueSuffix)
+            formData.append('educational_center_id', this.$store.getters['eduCenter/getId'])
             formData.append('image', this.addCategoryImage, this.addCategoryImage.name)
 
             const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/curses/category/add`, {
@@ -1091,7 +1159,17 @@ export default {
         },
 
         async getAllData() {
-            const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/curses`)
+            const educational_center_id = this.$store.getters['eduCenter/getId']
+
+            const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/curses`, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8'
+                },
+                body: JSON.stringify({
+                    educational_center_id: educational_center_id
+                })
+            })
             const data = await result.json()
             this.curseTable = data.curses
             this.categoryTable = data.categories
@@ -1105,30 +1183,53 @@ export default {
         
         fileUpload() {
             const filename = this.$refs.imageCurse.$refs.input.files
-            this.addCurseImage = filename[0]
-            this.addCurseUniqueSuffix = uuidv4()
+            if (filename.length) {
+                this.addCurseImage = filename[0]
+                this.addCurseUniqueSuffix = uuidv4()
 
-            this.addCurseImagePreview = URL.createObjectURL(filename[0])
+                this.addCurseImagePreview = URL.createObjectURL(filename[0])
+            } else {
+                this.addCurseImage = ""
+
+                this.addCurseImagePreview = ""
+            }
         },
         fileUploadEdit() {
             const filename = this.$refs.imageCurseEdit.$refs.input.files
-            this.editCurseImage = filename[0]
-            this.editCurseUniqueSuffix = uuidv4()
+            if (filename.length) {
+                this.editCurseImage = filename[0]
+                this.editCurseUniqueSuffix = uuidv4()
 
-            this.editCurseImagePreview = URL.createObjectURL(filename[0])
+                this.editCurseImagePreview = URL.createObjectURL(filename[0])
+            } else {
+                this.editCurseImage = ""
+
+                this.editCurseImagePreview = ""
+            }
         },
         imageUploadCategory() {
             const filename = this.$refs.imageCategoryAdd.$refs.input.files
-            this.addCategoryImage = filename[0]
-            console.log(this.addCategoryImage)
+            if(filename.length) {
+                this.addCategoryImage = filename[0]
 
-            this.addCategoryImagePreview = URL.createObjectURL(filename[0])
+                this.addCategoryImagePreview = URL.createObjectURL(filename[0])
+            } else {
+                this.addCategoryImage = ""
+
+                this.addCategoryImagePreview = ""
+            }
         },
         imageUploadCategoryEdit() {
             const filename = this.$refs.imageCategoryEdit.$refs.input.files
-            this.editCategoryImage = filename[0]
+            if(filename.length) {
+                this.editCategoryImage = filename[0]
 
-            this.editCategoryImagePreview = URL.createObjectURL(filename[0])
+                this.editCategoryImagePreview = URL.createObjectURL(filename[0])
+            } else {
+                this.editCategoryImage = ""
+
+                this.editCategoryImagePreview = ""
+            }
         }
     },
     beforeMount() {
@@ -1152,5 +1253,4 @@ export default {
 </script>
 
 <style scoped>
-
 </style>

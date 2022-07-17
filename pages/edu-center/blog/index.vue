@@ -2,7 +2,9 @@
     <div>
         <v-col
         cols="12"
-        sm="9"
+        sm="12"
+        md="12"
+        lg="10"
         >
             <h2 class="mb-8 mr-10 float-left">Статьи</h2>
             <div class="wrapper d-flex justify-space-between align-center">
@@ -526,10 +528,13 @@ export default {
         },
         async addArticle() {
             this.isAdd = true
+            const educational_center_id = this.$store.getters['eduCenter/getId']
+
             const newArticle = {
                 title: this.titleArticle,
                 description: this.descriptionArticle,
-                rubrics: this.addRubrics
+                rubrics: this.addRubrics,
+                educational_center_id: educational_center_id
             }
             const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/blog/add`, {
                 method: "POST",
@@ -559,12 +564,14 @@ export default {
             this.isAddRubric = true
         },
         async addRubric() {
+            const educational_center_id = this.$store.getters['eduCenter/getId']
+
             const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/blog/rubrics/add`, {
                 method: "POST", 
                 headers: {
                     'Content-Type': 'application/json;charset=utf-8'
                 },
-                body: JSON.stringify({title: this.newRubric})
+                body: JSON.stringify({title: this.newRubric, educational_center_id: educational_center_id})
             })
             const rub = await result.json()
             this.items.push(rub.rubric.title)
@@ -614,20 +621,24 @@ export default {
             this.isEdit = false
         },
         async getAllBlog() {
-            const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/blog`)
+            const educational_center_id = this.$store.getters['eduCenter/getId']
+            const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/blog`, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8'
+                },
+                body: JSON.stringify({educational_center_id: educational_center_id})
+            })
             const data = await result.json()
             
             data.blogRubrics.forEach(rub => {
                 this.items.push(rub.title)
             })
             this.articles = data.blogArticles
+            this.rubricTable = data.blogRubrics
         },
         async doRubrics() {
             this.isDoRubrics = true
-            const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/blog/rubrics`)
-            const data = await result.json()
-
-            this.rubricTable = data.result
         }
     }, 
     async beforeMount() {

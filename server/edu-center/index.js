@@ -1,29 +1,36 @@
 module.exports = function(app, upload) {
-    const { educationalCenter, moderation, articles, rubrics, curse, category, status } = require('../db/scheme')
+    const { educationalCenter, moderation, articles, rubrics, curse, category, status, Op } = require('../db/scheme')
+
     const fs = require('fs')
-    const baseSettings = require('../config/serverSetting')
     // не articles.create({}), educationalCenter.addArticle()
 
-    app.get('/edu-center/blog', async (req, res) => {
-        const blogArticles = await articles.findAll()
-        const blogRubrics = await rubrics.findAll()
+    app.post('/edu-center/blog', async (req, res) => {
+        const educational_center_id = req.body.educational_center_id
+
+        const ec = await educationalCenter.findOne({where: {
+            educational_center_id: educational_center_id
+        }})
+        
+
+        const blogArticles = await ec.getArticles()
+        const blogRubrics = await ec.getRubrics()
 
         res.json({blogArticles, blogRubrics})
     })
 
-    app.post('/edu-center/blog/rubrics', async (req, res) => {
-        const articles_id = req.body.articles_id
-        const article = await articles.findOne({where: {articles_id: articles_id}})
-        const rubrics = await article.getRubrics()
-
-        res.json({rubrics})
-    })
-
     app.post('/edu-center/blog/rubrics/add', async (req, res) => {
         const title = req.body.title
+        const educational_center_id = req.body.educational_center_id
+
         const rubric = await rubrics.create({
             title: title
         })
+        const ec = await educationalCenter.findOne({
+            where: {
+                educational_center_id: educational_center_id
+            }
+        })
+        await ec.addRubric(rubric)
 
         res.json({rubric})
     })
@@ -71,12 +78,34 @@ module.exports = function(app, upload) {
                 rubrics_id: rubrics_id
             }
         })
+
+        res.json({ok: true})
+    })
+
+    app.post('/edu-center/blog/rubrics', async (req, res) => {
+        const articles_id = req.body.articles_id
+
+        const article = await articles.findOne({
+            where: {
+                articles_id: articles_id
+            }
+        })
+
+        const rubrics = await article.getRubrics()
+        res.json({rubrics})
     })
 
     app.post('/edu-center/blog/add', async (req, res) => {
+        const educational_center_id = req.body.educational_center_id
+
         const article = await articles.create({
             title: req.body.title,
             description: req.body.description,
+        })
+        const ec = await educationalCenter.findOne({
+            where: {
+                educational_center_id: educational_center_id
+            }
         })
         if (req.body.rubrics.length) {
             req.body.rubrics.forEach(async rubric => {
@@ -86,6 +115,9 @@ module.exports = function(app, upload) {
                 await article.addRubric(t)
             })
         }
+
+        await ec.addArticle(article)
+
         res.json({article})
     })
 
@@ -129,6 +161,8 @@ module.exports = function(app, upload) {
     })
 
     app.post('/edu-center/curses/add', upload.single('image'), async (req, res) => {
+        const educational_center_id = req.body.educational_center_id
+
         let arr = req.file.originalname.split('.')
         const extension = arr.slice(-1)[0]
 
@@ -152,10 +186,40 @@ module.exports = function(app, upload) {
                 title: "public"
             }
         })
+        const ec = await educationalCenter.findOne({
+            where: {
+                educational_center_id: educational_center_id
+            }
+        })
+
+        const cats = JSON.parse(req.body.categories)
+        if(cats) {
+            for(const cat of cats) {
+                const c = await category.findOne({where: {
+                    title: cat
+                }})
+                await aCurse.addCategory(c)
+            }
+        }
 
         await aCurse.addStatus(publicStatus)
+        await ec.addCurse(aCurse)
 
         res.json({aCurse})
+    })
+
+    app.post('/edu-center/category', async (req, res) => {
+        const curse_id = req.body.curse_id
+
+        const aCurse = await curse.findOne({
+            where: {
+                curse_id: curse_id
+            }
+        })
+
+        const categories = await aCurse.getCategories()
+
+        res.json({categories})
     })
 
     app.put('/edu-center/curses/edit', upload.single('image'), async (req, res) => {
@@ -203,6 +267,18 @@ module.exports = function(app, upload) {
                     curse_id: req.body.curse_id
                 }
             })
+        }
+        const cats = JSON.parse(req.body.categories)
+
+        if(cats) {
+            aCurse.setCategories(null)
+
+            for(const cat of cats) {
+                const c = await category.findOne({where: {
+                    title: cat.title
+                }})
+                await aCurse.addCategory(c)
+            }
         }
 
         res.json({aCurse})
@@ -258,26 +334,34 @@ module.exports = function(app, upload) {
         res.json({ok: true})
     })
 
-    app.get('/edu-center/curses', async (req, res) => {
-        const categories = await category.findAll()
-        const trash = await status.findOne({
+    app.post('/edu-center/curses', async (req, res) => {
+        const educational_center_id = req.body.educational_center_id
+        const ec = await educationalCenter.findOne({
             where: {
-                title: "trashed"
+                educational_center_id: educational_center_id
             }
         })
-        const publicStatus = await status.findOne({
-            where: {
-                title: "public"
+
+        const categories = await ec.getCategories()
+        const curses = await ec.getCurses()
+        let trashedCurses = []
+        let publicCurses = []
+
+        for(const cur of curses) {
+            const stat = await cur.getStatuses()
+            if(stat[0].title === "public") {
+                publicCurses.push(cur)
+            } else if(stat[0].title === "trashed") {
+                trashedCurses.push(cur)
             }
-        })
-        
-        const trashedCurses = await trash.getCurses()
-        const publicCurses = await publicStatus.getCurses()
+        }
 
         res.json({trashedCurses, categories, curses: publicCurses})
     })
 
     app.post('/edu-center/curses/category/add', upload.single('image'), async (req, res) => {
+        const educational_center_id = req.body.educational_center_id
+
         let arr = req.file.originalname.split('.')
         const extension = arr.slice(-1)[0]
 
@@ -287,6 +371,14 @@ module.exports = function(app, upload) {
             title: req.body.title,
             image: imageSrc
         })
+
+        const ec = await educationalCenter.findOne({
+            where: {
+                educational_center_id: educational_center_id
+            }
+        })
+
+        ec.addCategory(aCategory)
 
         res.json({aCategory})
     })
@@ -337,9 +429,9 @@ module.exports = function(app, upload) {
         res.json({ok: true})
     })
 
-    app.post('/edu/login', async (req, res) => {
+    app.post('/edu-center/login', async (req, res) => {
         res.json({
-            id: "71624571",
+            id: 1,
             ok: true,
             tokens: {
                 access: null,
@@ -347,6 +439,27 @@ module.exports = function(app, upload) {
                 expires: 0
             }
         })
+    })
+
+    app.post('/edu-center/excel', async (req, res) => {
+        const range = req.body.dates
+
+        const curses = await curse.findAll({
+            where: {
+                [Op.and]: [
+                    {date_start: {[Op.gte]: range[0]}},
+                    {date_end: {[Op.lte]: range[1]}}
+                ]
+            }
+        })
+        let doctors = []
+        const ec = await curses[0].getEducational_centers()
+        curses.forEach(async cur => {
+            const d = await cur.getDoctors()
+            if (d)
+                doctors.push(await cur.getDoctors())
+        })
+        res.json({curses, doctors, eduCenter: ec})
     })
 
     app.post('edu/moderate', async (req, res) => {

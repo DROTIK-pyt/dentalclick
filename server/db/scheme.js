@@ -1,6 +1,6 @@
 const dbBaseSetting = require('../config/dbBaseSetting.json')
 
-const { Sequelize, DataTypes } = require("sequelize")
+const { Sequelize, DataTypes, Op } = require("sequelize")
 const sequelize = new Sequelize(dbBaseSetting.dataBase, dbBaseSetting.user, dbBaseSetting.password, {
   dialect: "mysql",
   host: dbBaseSetting.host,
@@ -138,7 +138,7 @@ const curse = sequelize.define('curse', {
         allowNull: false,
     },
     price: {
-        type: DataTypes.DECIMAL(20, 2),
+        type: DataTypes.STRING,
         allowNull: true,
     },
     score: {
@@ -252,6 +252,7 @@ module.exports = {
     dbBaseSetting,
     DataTypes,
     sequelize,
+    Op,
     status,
     category,
     doctor,

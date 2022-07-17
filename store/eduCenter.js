@@ -8,7 +8,7 @@ export const state = () => ({
             refresh: null,
             expires: 0
         },
-        id: 0,
+        id: 1,
     }   
 })
 
@@ -18,6 +18,9 @@ export const getters = {
     },
     getTokens(state) {
         return state.profile.tokens
+    },
+    getId(state) {
+        return state.profile.id
     }
 }
 
