@@ -1,6 +1,5 @@
 module.exports = function(app, upload) {
     const { educationalCenter, moderation, articles, rubrics, curse, category, status, Op } = require('../db/scheme')
-
     const fs = require('fs')
     // не articles.create({}), educationalCenter.addArticle()
 
@@ -429,6 +428,110 @@ module.exports = function(app, upload) {
         res.json({ok: true})
     })
 
+    app.post('/edu-center/reports/maxmin', async (req, res) => {
+        const educational_center_id = req.body.educational_center_id
+
+        const ec = await educationalCenter.findOne({
+            where: {
+                educational_center_id: educational_center_id
+            }
+        })
+
+        const curses = await ec.getCurses()
+        let maxAllowed = new Date().toISOString().split('T')[0]
+        let minAllowed = new Date().toISOString().split('T')[0]
+
+        for(const cur of curses) {
+            if(cur.date_start <= minAllowed)
+                minAllowed = cur.date_start
+            if(cur.date_end >= maxAllowed)
+                maxAllowed = cur.date_end
+        }
+
+        res.json({minAllowed, maxAllowed})
+    })
+
+    app.post('/edu-center/excel', async (req, res) => {
+        const range = req.body.dates
+        const educational_center_id = req.body.educational_center_id
+
+        const ec = await educationalCenter.findOne({
+            where: {
+                educational_center_id: {[Op.eq]: educational_center_id}
+            },
+        })
+
+        const curses = await ec.getCurses({
+            where: {
+                [Op.and]: [
+                    {date_start: {[Op.gte]: range[0]}},
+                    {date_end: {[Op.lte]: range[1]}},
+                ]
+            }
+        })
+
+        let doctors = []
+        for(const cur of curses) {
+            const d = await cur.getDoctors()
+            if (d)
+                doctors.push(d)
+        }
+        
+        let excel = []
+
+        for(let i = 0; i < curses.length; i++) {
+            for(let j = 0; j < doctors[i].length; j++) {
+                excel.push({
+                    "ФИО": doctors[i][j].name,
+                    "Телефон": doctors[i][j].phone,
+                    "E-mail": doctors[i][j].email,
+                    "Регион": doctors[i][j].region,
+                    "Образовательный центр": ec.title,
+                    "Название курса": curses[i].title,
+                    "Дата начала": curses[i].date_start,
+                    "Дата завершения": curses[i].date_end,
+                    "Цена": curses[i].price,
+                    "Город проведения": curses[i].town,
+                })
+            }
+        }
+
+        res.xls('data.xlsx', excel)
+    })
+
+    app.post('/edu/moderate', async (req, res) => {
+        const data = req.body
+        const center = await educationalCenter.findOne({where: {educational_center_id: data.id}})
+        const newModerate = await moderation.create({
+            new_information: JSON.stringify(data)
+        })
+        await center.addModeration(newModerate)
+
+        res.json({ok: true})
+    })
+
+    app.post('/edu/info', async (req, res) => {
+        const ec = await educationalCenter.findOne({
+            where: {
+                educational_center_id: req.body.educational_center_id
+            }
+        })
+
+        res.json({info: ec})
+    })
+
+    app.post('/edu-center/accesses', async (req, res) => {
+        const ec = await educationalCenter.findOne({
+            where: {
+                educational_center_id: req.body.educational_center_id
+            }
+        })
+
+        const ecAccessRights = await ec.getAccess_rights()
+
+        res.json({ecAccessRights})
+    })
+
     app.post('/edu-center/login', async (req, res) => {
         res.json({
             id: 1,
@@ -439,36 +542,5 @@ module.exports = function(app, upload) {
                 expires: 0
             }
         })
-    })
-
-    app.post('/edu-center/excel', async (req, res) => {
-        const range = req.body.dates
-
-        const curses = await curse.findAll({
-            where: {
-                [Op.and]: [
-                    {date_start: {[Op.gte]: range[0]}},
-                    {date_end: {[Op.lte]: range[1]}}
-                ]
-            }
-        })
-        let doctors = []
-        const ec = await curses[0].getEducational_centers()
-        curses.forEach(async cur => {
-            const d = await cur.getDoctors()
-            if (d)
-                doctors.push(await cur.getDoctors())
-        })
-        res.json({curses, doctors, eduCenter: ec})
-    })
-
-    app.post('edu/moderate', async (req, res) => {
-        const data = req.body
-        const center = await educationalCenter.findOne({where: {educational_center_id: data.id}})
-        const newModerate = await moderation.create({
-            educational_center_id: data.id,
-            new_information: JSON.stringify(data)
-        })
-        center.addModerate(newModerate)
     })
 }

@@ -10,6 +10,7 @@
                 depressed
                 color="primary"
                 class="mb-2"
+                @click="sendToModerate"
                 >
                 Отправить на модерацию
                 </v-btn>
@@ -91,23 +92,65 @@
 </template>
 
 <script>
+const baseSettings = require('../../server/config/serverSetting')
+
 export default {
     layout: 'Profile',
     middleware: 'eduCheckAuth',
     data() {
         return {
-            id: "",
+            id: this.$store.getters['eduCenter/getId'],
             title: "",
             contact_person: "",
             phone: "",
             email: "",
-            password: "",
             site_url: "",
             requisites: "",
             add_notes: ""
         }
     },
-    beforeMount() {
+    methods: {
+        async sendToModerate() {
+            const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu/moderate`, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8'
+                },
+                body: JSON.stringify({
+                    id: this.id,
+                    title: this.title,
+                    contact_person: this.contact_person,
+                    phone: this.phone,
+                    email: this.email,
+                    site_url: this.site_url,
+                    requisites: this.requisites,
+                    add_notes: this.add_notes
+                })
+            })
+            const responsed = await result.json()
+        }
+    },
+    async beforeMount() {
+        const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu/info`, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify({
+                educational_center_id: this.id,
+            })
+        })
+        const responsed = await result.json()
+
+        this.id = responsed.info.educational_center_id
+        this.title = responsed.info.title
+        this.contact_person = responsed.info.contact_person
+        this.phone = responsed.info.phone
+        this.email = responsed.info.email
+        this.site_url = responsed.info.site_url
+        this.requisites = responsed.info.requisites
+        this.add_notes = responsed.info.add_notes
+
         this.$store.commit('eduCenter/syncState')
     },
     beforeDestroy() {

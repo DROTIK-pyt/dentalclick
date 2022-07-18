@@ -63,6 +63,7 @@
                             color="primary"
                             class="mr-1"
                             @click="doCategory"
+                            v-if="isShowCategoryBtn"
                             >
                             <v-icon left>
                                 mdi-table
@@ -73,6 +74,7 @@
                             tile
                             :color="trashBtnColor"
                             @click="showTrash = !showTrash"
+                            v-if="isShowTrashBtn"
                             >
                             <v-icon left>
                                 mdi-trash-can
@@ -737,6 +739,10 @@ export default {
             trashBtnTitle: "Корзина",
             trashBtnColor: "error",
 
+            rights: [],
+            isShowTrashBtn: true,
+            isShowCategoryBtn: true,
+
 
             // данные курсов на добавление
             isAddCurse: false,
@@ -869,9 +875,13 @@ export default {
     },
     methods: {
         toAddCurse() {
+            this.checkRight()
+
             this.isAddCurse = true
         },
         async confirmAddCurse() {
+            this.checkRight()
+
             let formData = new FormData()
 
             formData.append('title', this.addCurseTitle)
@@ -903,6 +913,8 @@ export default {
             this.isAddCurse = false
         },
         cancelAddCurse() {
+            this.checkRight()
+
             this.addCurseTitle = ""
             this.addCurseProgram = ""
             this.addCurseTown = ""
@@ -920,6 +932,8 @@ export default {
         },
 
         async toEditCurse(curse) {
+            this.checkRight()
+
             if (!this.isShowEditInTrashError) {
                 this.isEditCurse = true
 
@@ -955,6 +969,8 @@ export default {
             }
         },
         async confirmEditCurse() {
+            this.checkRight()
+
             let formData = new FormData()
 
             formData.append('curse_id', this.editCurseId)
@@ -986,6 +1002,8 @@ export default {
             this.showEditInTrashError = false
         },
         cancelEditCurse() {
+            this.checkRight()
+
             this.editCurseTitle = ""
             this.editCurseProgram = ""
             this.editCurseTown = ""
@@ -1003,12 +1021,16 @@ export default {
         },
 
         toDeleteCurse(curse) {
+            this.checkRight()
+
             this.isDeleteCurse = true
 
             this.deleteCurseId = curse.curse_id
             this.deleteCurseTitle = curse.title
         },
         async confirmDeleteCurse() {
+            this.checkRight()
+
             if (!this.showTrash) {
                 await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/curses/trash`, {
                     method: "DELETE",
@@ -1036,11 +1058,15 @@ export default {
             }
         },
         cancelDeleteCurse() {
+            this.checkRight()
+
             this.isDeleteCurse = false
             this.deleteCurseId = ""
             this.deleteCurseTitle = ""
         },
         async confirmReestablishCurse() {
+            this.checkRight()
+
             await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/curses/reestablish`, {
                 method: "POST",
                 headers: {
@@ -1055,18 +1081,26 @@ export default {
             this.getAllData()
         },
         cancelReestablishCurse() {
+            this.checkRight()
+
             this.showEditInTrashError = false
         },
 
         doCategory() {
+            this.checkRight()
+
             this.showCategories = true
         },
 
         toAddCategory() {
+            this.checkRight()
+
             this.isAddCategory = true
             this.addCategoryUniqueSuffix = uuidv4()
         },
         async confirmAddCategory() {
+            this.checkRight()
+
             let formData = new FormData()
 
             formData.append('title', this.addCategoryTitle)
@@ -1090,10 +1124,14 @@ export default {
             this.isAddCategory = false
         },
         cancelAddCategory() {
+            this.checkRight()
+
             this.isAddCategory = false
         },
 
         toEditCategory(category) {
+            this.checkRight()
+
             this.isEditCategory = true
 
             this.editCategoryId = category.category_id
@@ -1102,6 +1140,8 @@ export default {
             this.editCategoryUniqueSuffix = uuidv4()
         },
         async confirmEditCategory() {
+            this.checkRight()
+
             let formData = new FormData()
 
             formData.append('title', this.editCategoryTitle)
@@ -1124,6 +1164,8 @@ export default {
             this.isEditCategory = false
         },
         cancelEditCategory() {
+            this.checkRight()
+
             this.isEditCategory = false
 
             this.editCategoryId = ""
@@ -1132,12 +1174,16 @@ export default {
         },
 
         toDeleteCategory(category) {
+            this.checkRight()
+
             this.isDeleteCategory = true
 
             this.deleteCategoryTitle = category.title
             this.deleteCategoryId = category.category_id
         },
         async confirmDeleteCategory() {
+            this.checkRight()
+
             await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/curses/category`, {
                 method: "DELETE", 
                 headers: {
@@ -1152,6 +1198,8 @@ export default {
             this.isDeleteCategory = false
         },
         cancelDeleteCategory() {
+            this.checkRight()
+
             this.isDeleteCategory = false
 
             this.deleteCategoryTitle = ""
@@ -1159,6 +1207,8 @@ export default {
         },
 
         async getAllData() {
+            this.checkRight()
+
             const educational_center_id = this.$store.getters['eduCenter/getId']
 
             const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/curses`, {
@@ -1182,6 +1232,8 @@ export default {
         },
         
         fileUpload() {
+            this.checkRight()
+
             const filename = this.$refs.imageCurse.$refs.input.files
             if (filename.length) {
                 this.addCurseImage = filename[0]
@@ -1195,6 +1247,8 @@ export default {
             }
         },
         fileUploadEdit() {
+            this.checkRight()
+
             const filename = this.$refs.imageCurseEdit.$refs.input.files
             if (filename.length) {
                 this.editCurseImage = filename[0]
@@ -1208,6 +1262,8 @@ export default {
             }
         },
         imageUploadCategory() {
+            this.checkRight()
+
             const filename = this.$refs.imageCategoryAdd.$refs.input.files
             if(filename.length) {
                 this.addCategoryImage = filename[0]
@@ -1220,6 +1276,8 @@ export default {
             }
         },
         imageUploadCategoryEdit() {
+            this.checkRight()
+
             const filename = this.$refs.imageCategoryEdit.$refs.input.files
             if(filename.length) {
                 this.editCategoryImage = filename[0]
@@ -1230,9 +1288,37 @@ export default {
 
                 this.editCategoryImagePreview = ""
             }
+        },
+        checkRight() {
+            if(!this.rights.includes('ec_access_curse')) {
+                this.$router.go(-1)
+            }
         }
     },
-    beforeMount() {
+    async beforeMount() {
+        const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/accesses`, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify({
+                educational_center_id: this.$store.getters['eduCenter/getId']
+            })
+        })
+        const {ecAccessRights} = await result.json()
+
+        for(const ecAccessRight of ecAccessRights) {
+            this.rights.push(ecAccessRight.type)
+        }
+
+        if(!this.rights.includes('ec_access_category')) {
+            this.isShowCategoryBtn = false
+        }
+
+        if(!this.rights.includes('ec_access_trash')) {
+            this.isShowTrashBtn = false
+        }
+
         this.getAllData()
     },
     computed: {

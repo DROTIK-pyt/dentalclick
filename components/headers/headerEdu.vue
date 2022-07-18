@@ -12,9 +12,9 @@
                 </nuxt-link>
             </v-col>
             <v-col class="right d-flex justify-space-between align-center" cols="12" sm="9" lg="5" offset-lg="4" tag="ul">
-                <nuxt-link class="header-link text-h6" to="curses">Мои курсы</nuxt-link>
-                <nuxt-link class="header-link text-h6" to="reports">Мои отчеты</nuxt-link>
-                <nuxt-link class="header-link text-h6" to="blog">Мой блог</nuxt-link>
+                <nuxt-link class="header-link text-h6" to="curses" v-if="isShowCurses">Мои курсы</nuxt-link>
+                <nuxt-link class="header-link text-h6" to="reports" v-if="isShowReports">Мои отчеты</nuxt-link>
+                <nuxt-link class="header-link text-h6" to="blog" v-if="isShowBlog">Мой блог</nuxt-link>
                 <v-btn
                 tile
                 color="error"
@@ -31,11 +31,15 @@
 </template>
 
 <script>
+const baseSettings = require('../../server/config/serverSetting')
+
 export default {
     name: "headerEdu",
     data() {
         return {
-            
+            isShowCurses: true,
+            isShowReports: true,
+            isShowBlog: true,
         }
     },
     methods: {
@@ -44,6 +48,32 @@ export default {
             this.$store.commit('eduCenter/saveState')
             this.$router.push({path: "/edu-center/login"})
         }
+    },
+    async beforeMount() {
+        const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/accesses`, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify({
+                educational_center_id: this.$store.getters['eduCenter/getId']
+            })
+        })
+        const {ecAccessRights} = await result.json()
+
+        let rights = []
+        for(const ecAccessRight of ecAccessRights) {
+            rights.push(ecAccessRight.type)
+        }
+
+        if(!rights.includes('ec_access_curse'))
+            this.isShowCurses = false
+            
+        if(!rights.includes('ec_access_reports'))
+            this.isShowReports = false
+
+        if(!rights.includes('ec_access_blog'))
+            this.isShowBlog = false
     }
 }
 </script>

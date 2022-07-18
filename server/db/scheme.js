@@ -191,6 +191,9 @@ const doctor = sequelize.define('doctor', {
 doctor.belongsToMany(curse, {through: "doctorCurse"})
 curse.belongsToMany(doctor, {through: "doctorCurse"})
 
+doctor.belongsToMany(accessRight, {through: "doctorAR"})
+accessRight.belongsToMany(doctor, {through: "doctorAR"})
+
 const category = sequelize.define('category', {
     category_id: {
         type: DataTypes.INTEGER,
@@ -233,10 +236,6 @@ const moderation = sequelize.define('moderation', {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,
-        allowNull: false,
-    },
-    educational_center_id: {
-        type: DataTypes.INTEGER,
         allowNull: false,
     },
     new_information: {

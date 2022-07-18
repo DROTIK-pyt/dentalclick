@@ -13,7 +13,7 @@
                     fab
                     dark
                     color="indigo"
-                    @click="isAdd = true"
+                    @click="toAddArticle"
                     >
                     <v-icon dark>
                         mdi-plus
@@ -427,6 +427,8 @@ export default {
             deleteRubricTitle: null,
             deleteRubricId: 0,
 
+            rights: [],
+
             rubricHeaders: [
                 {
                 text: 'Название рубрики',
@@ -454,6 +456,8 @@ export default {
     },
     methods: {
         async editItem(item) {
+            this.checkRight()
+
             this.titleArticle = item.title
             this.descriptionArticle = item.description
             const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/blog/rubrics`, {
@@ -473,11 +477,15 @@ export default {
             this.isEdit = true           
         },
         deleteItem(item) {
+            this.checkRight()
+
             this.deletingTitle = item.title
             this.deletingId = item.articles_id
             this.isDelete = true
         },
         async confirmDelete() {
+            this.checkRight()
+
             // удаляем
             await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/blog`, {
                 method: "DELETE",
@@ -494,16 +502,22 @@ export default {
             this.isDelete = false
         },
         toDeleteRubric(item) {
+            this.checkRight()
+
             this.isDeleteRubric = true
             this.deleteRubricId = item.rubrics_id
             this.deleteRubricTitle = item.title
         },
         toEditRubric(item) {
+            this.checkRight()
+
             this.isEditRubric = true
             this.editRubricId = item.rubrics_id
             this.editRubricTitle = item.title
         },
         async confirmDeleteRubric() {
+            this.checkRight()
+
             this.isDeleteRubric = false
             await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/blog/rubrics`, {
                 method: "DELETE",
@@ -516,18 +530,28 @@ export default {
             this.rubricTable = this.rubricTable.filter(rubric => rubric.title != this.deleteRubricTitle)
         },
         cancelDelete() {
+            this.checkRight()
+
             // ничего не делаем
             this.isDelete = false
             this.deletingId = null
             this.deletingTitle = ""
         },
         cancelDeleteRubric() {
+            this.checkRight()
+
             this.isDeleteRubric = false
             this.deleteRubricId = 0
             this.deleteRubricTitle = ""
         },
-        async addArticle() {
+        toAddArticle() {
+            this.checkRight()
+
             this.isAdd = true
+        },
+        async addArticle() {
+            this.checkRight()
+            
             const educational_center_id = this.$store.getters['eduCenter/getId']
 
             const newArticle = {
@@ -548,22 +572,32 @@ export default {
             this.isAdd = false
         },
         viewTrash() {
+            this.checkRight()
+
             this.$router.push({path: "trash"})
         },
         cancelAddArticle() {
+            this.checkRight()
+
             this.titleArticle = ""
             this.descriptionArticle = ""
             this.isAdd = false
         },
         cancelEditArticle() {
+            this.checkRight()
+
             this.titleArticle = ""
             this.descriptionArticle = ""
             this.isEdit = false
         },
         toAddRubric() {
+            this.checkRight()
+
             this.isAddRubric = true
         },
         async addRubric() {
+            this.checkRight()
+
             const educational_center_id = this.$store.getters['eduCenter/getId']
 
             const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/blog/rubrics/add`, {
@@ -583,6 +617,8 @@ export default {
             this.isAddRubric = false
         },
         async editRubric() {
+            this.checkRight()
+
             const title = this.editRubricTitle
             const rubrics_id = this.editRubricId
             console.log({title: title, rubrics_id: rubrics_id})
@@ -605,6 +641,8 @@ export default {
             this.isEditRubric = false
         },
         async saveArticle() {
+            this.checkRight()
+
             const editArticle = {
                 articles_id: this.editingId,
                 rubrics: this.editRubrics,
@@ -621,6 +659,8 @@ export default {
             this.isEdit = false
         },
         async getAllBlog() {
+            this.checkRight()
+
             const educational_center_id = this.$store.getters['eduCenter/getId']
             const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/blog`, {
                 method: "POST",
@@ -638,10 +678,32 @@ export default {
             this.rubricTable = data.blogRubrics
         },
         async doRubrics() {
+            this.checkRight()
+
             this.isDoRubrics = true
+        },
+        checkRight() {
+            if(!this.rights.includes('ec_access_blog')) {
+                this.$router.go(-1)
+            }
         }
-    }, 
+    },
     async beforeMount() {
+        const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/accesses`, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify({
+                educational_center_id: this.$store.getters['eduCenter/getId']
+            })
+        })
+        const {ecAccessRights} = await result.json()
+
+        for(const ecAccessRight of ecAccessRights) {
+            this.rights.push(ecAccessRight.type)
+        }
+
         this.getAllBlog()
     }
 }

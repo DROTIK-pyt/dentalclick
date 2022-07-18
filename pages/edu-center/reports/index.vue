@@ -13,6 +13,8 @@
                     <v-date-picker
                         v-model="dates"
                         range
+                        :min="minAllowed"
+                        :max="maxAllowed"
                     ></v-date-picker>
                     <v-btn
                     color="success"
@@ -31,6 +33,7 @@
                     >
                     Скачать
                     </v-btn>
+                    {{sortedDates}}
                 </v-col>
             </v-row>
         </v-col>
@@ -44,8 +47,8 @@
 </template>
 
 <script>
-// const json2excel = require('json2excel')
 const baseSettings = require('../../../server/config/serverSetting')
+const fs = require('fs')
 
 export default {
     layout: 'Profile',
@@ -54,6 +57,8 @@ export default {
         return {
             dates: [],
             isDownload: false,
+            maxAllowed: "",
+            minAllowed: "",
             headerExcel: {
                 "name": "ФИО",
                 "phone": "Телефон",
@@ -76,43 +81,81 @@ export default {
                 sheets: [this.sheet],
                 filepath: '../../../static/reports/report.xlxs'
             },
-            binaryExcel: null,
+            rights: [],
         }
     },
     methods: {
         async toFormating() {
+            this.checkRight()
+
+            const educational_center_id = this.$store.getters['eduCenter/getId']
+
             const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/excel`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json;charset=utf-8'
                 },
                 body: JSON.stringify({
-                    dates: this.dates
+                    dates: this.sortedDates,
+                    educational_center_id: educational_center_id
                 })
-            }) 
-            const {curses, doctors, eduCenter} = await result.json()
+            })
+            const excel = await result.blob()
+            const url = URL.createObjectURL(excel)
+            const a = document.createElement('a')
+            a.href = url
+            a.download = 'report.xlsx'
+            a.style.display = 'none'
+            a.click()
 
-            for(let i = 0; i < curses.length; i++) {
-                for(let j = 0; j < doctors.length; j++) {
-                    this.itemsExcel.push({
-                        name: doctors[j].name,
-                        phone: doctors[j].phone,
-                        email: doctors[j].email,
-                        region: doctors[j].region,
-                        titleEduCenter: eduCenter[0].title,
-                        titleCurse: curses[i].title,
-                        dateCurseStart: curses[i].date_start,
-                        dateCurseEnd: curses[i].date_end,
-                        price: curses[i].price,
-                        town: curses[i].town,
-                    })
-                }
-            }
+            // fs.writeFileSync('../../../static/reports/report.xlsx', excel)
+
         },
-        downloadReport() {
-
+        checkRight() {
+            if(!this.rights.includes('ec_access_reports')) {
+                this.$router.go(-1)
+            }
         }
     },
+    computed: {
+        sortedDates() {
+            return this.dates.sort()
+        }
+    },
+    async beforeMount() {
+        let result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/accesses`, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify({
+                educational_center_id: this.$store.getters['eduCenter/getId']
+            })
+        })
+        const {ecAccessRights} = await result.json()
+
+        for(const ecAccessRight of ecAccessRights) {
+            this.rights.push(ecAccessRight.type)
+        }
+
+        this.checkRight()
+        
+        const educational_center_id = this.$store.getters['eduCenter/getId']
+
+        result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/reports/maxmin`, {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json;charset=utf-8'
+            },
+            body: JSON.stringify({
+                educational_center_id: educational_center_id
+            })
+        })
+
+        const {minAllowed, maxAllowed} = await result.json()
+        this.minAllowed = minAllowed
+        this.maxAllowed = maxAllowed
+    }
 }
 </script>
 
