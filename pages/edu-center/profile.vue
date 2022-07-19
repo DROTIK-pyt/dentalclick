@@ -93,6 +93,7 @@
 
 <script>
 const baseSettings = require('../../server/config/serverSetting')
+const base64 = require('base-64')
 
 export default {
     layout: 'Profile',
@@ -111,6 +112,8 @@ export default {
     },
     methods: {
         async sendToModerate() {
+            this.checkAuth()
+
             const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu/moderate`, {
                 method: "POST",
                 headers: {
@@ -128,28 +131,63 @@ export default {
                 })
             })
             const responsed = await result.json()
+        },
+        async checkAuth() {
+            if(this.$store.getters['eduCenter/getTokens'].refresh) {
+                const refresh = this.$store.getters['eduCenter/getTokens'].refresh
+                const payload = JSON.parse(base64.decode(this.$store.getters['eduCenter/getTokens'].access.split('.')[1]))
+
+                if(Math.ceil(Date.now()/1000) >= +payload.exp - 8) {
+                    const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/refresh`, {
+                        method: "POST",
+                        headers: {
+                            'Content-Type': 'application/json;charset=utf-8',
+                        },
+                        body: JSON.stringify({
+                            refresh: refresh,
+                            educational_center_id: this.$store.getters['eduCenter/getId'],
+                        })
+                    })
+                    const responsed = await result.json()
+                    if(responsed.ok) {
+                        this.$store.commit('eduCenter/authenticate', {
+                            educational_center_id: this.$store.getters['eduCenter/getId'],
+                            tokens: responsed.tokens
+                        })
+                    } else {
+                        this.$store.commit('eduCenter/logout')
+                        this.$router.push({path: `/edu-center/login`})
+                    }
+                }
+            }
+        },
+        async getAllData() {
+            this.checkAuth()
+
+            const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu/info`, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8',
+                    'Authorization': 'Bearer ' + this.$store.getters['eduCenter/getTokens'].access
+                },
+                body: JSON.stringify({
+                    educational_center_id: this.id,
+                })
+            })
+            
+            const responsed = await result.json()
+
+            this.title = responsed.info.title
+            this.contact_person = responsed.info.contact_person
+            this.phone = responsed.info.phone
+            this.email = responsed.info.email
+            this.site_url = responsed.info.site_url
+            this.requisites = responsed.info.requisites
+            this.add_notes = responsed.info.add_notes
         }
     },
-    async beforeMount() {
-        const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu/info`, {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json;charset=utf-8'
-            },
-            body: JSON.stringify({
-                educational_center_id: this.id,
-            })
-        })
-        const responsed = await result.json()
-
-        this.id = responsed.info.educational_center_id
-        this.title = responsed.info.title
-        this.contact_person = responsed.info.contact_person
-        this.phone = responsed.info.phone
-        this.email = responsed.info.email
-        this.site_url = responsed.info.site_url
-        this.requisites = responsed.info.requisites
-        this.add_notes = responsed.info.add_notes
+    beforeMount() {
+        this.getAllData()
 
         this.$store.commit('eduCenter/syncState')
     },

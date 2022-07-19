@@ -1,6 +1,11 @@
 module.exports = function(app, upload) {
     const { educationalCenter, moderation, articles, rubrics, curse, category, status, Op } = require('../db/scheme')
     const fs = require('fs')
+    const md5 = require('md5')
+    const signature = "FJWr"
+    const { v4: uuidv4 } = require('uuid')
+    const jwt = require('jsonwebtoken')
+    const base64 = require('base-64')
     // не articles.create({}), educationalCenter.addArticle()
 
     app.post('/edu-center/blog', async (req, res) => {
@@ -533,14 +538,56 @@ module.exports = function(app, upload) {
     })
 
     app.post('/edu-center/login', async (req, res) => {
-        res.json({
-            id: 1,
-            ok: true,
-            tokens: {
-                access: null,
-                refresh: null,
-                expires: 0
+
+        const ec = await educationalCenter.findOne({
+            where: {
+                email: req.body.login,
+                password: md5(req.body.password)
             }
         })
+
+        if (ec) {
+            const refresh = uuidv4()
+            const access = jwt.sign({id: ec.educational_center_id, title: ec.title, wasSigned: Date.now() - 100}, signature, {expiresIn: "10m"})
+
+            await educationalCenter.update({
+                refresh_token: refresh
+            }, {
+                where: {
+                    educational_center_id: ec.educational_center_id
+                }
+            })
+
+            res.json({ok: true, educational_center_id: ec.educational_center_id, tokens: {refresh, access}})
+
+        } else {
+            res.json({ok: false})
+        }
+    })
+
+    app.post('/edu-center/refresh', async (req, res) => {
+
+        const ec = await educationalCenter.findOne({
+            where: {
+                educational_center_id: req.body.educational_center_id,
+                refresh_token: req.body.refresh
+            }
+        })
+        if(ec) {
+            const refresh = uuidv4()
+            const access = jwt.sign({id: ec.educational_center_id, title: ec.title}, signature, {expiresIn: "10m"})
+
+            await educationalCenter.update({
+                refresh_token: refresh
+            }, {
+                where: {
+                    educational_center_id: ec.educational_center_id
+                }
+            })
+
+            res.json({ok: true, eduCenter: ec, tokens: {refresh, access}})
+        } else {
+            res.json({ok: false})
+        }
     })
 }

@@ -730,6 +730,7 @@
 <script>
 const { v4: uuidv4 } = require('uuid')
 const baseSettings = require('../../../server/config/serverSetting')
+const base64 = require('base-64')
 
 export default {
     layout: 'Profile',
@@ -875,11 +876,15 @@ export default {
     },
     methods: {
         toAddCurse() {
+            this.checkAuth()
+            
             this.checkRight()
 
             this.isAddCurse = true
         },
         async confirmAddCurse() {
+            this.checkAuth()
+
             this.checkRight()
 
             let formData = new FormData()
@@ -913,6 +918,8 @@ export default {
             this.isAddCurse = false
         },
         cancelAddCurse() {
+            this.checkAuth()
+
             this.checkRight()
 
             this.addCurseTitle = ""
@@ -932,6 +939,8 @@ export default {
         },
 
         async toEditCurse(curse) {
+            this.checkAuth()
+
             this.checkRight()
 
             if (!this.isShowEditInTrashError) {
@@ -969,6 +978,8 @@ export default {
             }
         },
         async confirmEditCurse() {
+            this.checkAuth()
+
             this.checkRight()
 
             let formData = new FormData()
@@ -1002,6 +1013,8 @@ export default {
             this.showEditInTrashError = false
         },
         cancelEditCurse() {
+            this.checkAuth()
+
             this.checkRight()
 
             this.editCurseTitle = ""
@@ -1021,6 +1034,8 @@ export default {
         },
 
         toDeleteCurse(curse) {
+            this.checkAuth()
+
             this.checkRight()
 
             this.isDeleteCurse = true
@@ -1029,6 +1044,8 @@ export default {
             this.deleteCurseTitle = curse.title
         },
         async confirmDeleteCurse() {
+            this.checkAuth()
+
             this.checkRight()
 
             if (!this.showTrash) {
@@ -1058,6 +1075,8 @@ export default {
             }
         },
         cancelDeleteCurse() {
+            this.checkAuth()
+
             this.checkRight()
 
             this.isDeleteCurse = false
@@ -1081,24 +1100,32 @@ export default {
             this.getAllData()
         },
         cancelReestablishCurse() {
+            this.checkAuth()
+
             this.checkRight()
 
             this.showEditInTrashError = false
         },
 
         doCategory() {
+            this.checkAuth()
+
             this.checkRight()
 
             this.showCategories = true
         },
 
         toAddCategory() {
+            this.checkAuth()
+
             this.checkRight()
 
             this.isAddCategory = true
             this.addCategoryUniqueSuffix = uuidv4()
         },
         async confirmAddCategory() {
+            this.checkAuth()
+
             this.checkRight()
 
             let formData = new FormData()
@@ -1124,12 +1151,16 @@ export default {
             this.isAddCategory = false
         },
         cancelAddCategory() {
+            this.checkAuth()
+
             this.checkRight()
 
             this.isAddCategory = false
         },
 
         toEditCategory(category) {
+            this.checkAuth()
+
             this.checkRight()
 
             this.isEditCategory = true
@@ -1140,6 +1171,8 @@ export default {
             this.editCategoryUniqueSuffix = uuidv4()
         },
         async confirmEditCategory() {
+            this.checkAuth()
+
             this.checkRight()
 
             let formData = new FormData()
@@ -1164,6 +1197,8 @@ export default {
             this.isEditCategory = false
         },
         cancelEditCategory() {
+            this.checkAuth()
+
             this.checkRight()
 
             this.isEditCategory = false
@@ -1174,6 +1209,8 @@ export default {
         },
 
         toDeleteCategory(category) {
+            this.checkAuth()
+
             this.checkRight()
 
             this.isDeleteCategory = true
@@ -1182,6 +1219,8 @@ export default {
             this.deleteCategoryId = category.category_id
         },
         async confirmDeleteCategory() {
+            this.checkAuth()
+
             this.checkRight()
 
             await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/curses/category`, {
@@ -1198,6 +1237,8 @@ export default {
             this.isDeleteCategory = false
         },
         cancelDeleteCategory() {
+            this.checkAuth()
+
             this.checkRight()
 
             this.isDeleteCategory = false
@@ -1207,6 +1248,8 @@ export default {
         },
 
         async getAllData() {
+            this.checkAuth()
+
             this.checkRight()
 
             const educational_center_id = this.$store.getters['eduCenter/getId']
@@ -1232,6 +1275,8 @@ export default {
         },
         
         fileUpload() {
+            this.checkAuth()
+
             this.checkRight()
 
             const filename = this.$refs.imageCurse.$refs.input.files
@@ -1247,6 +1292,8 @@ export default {
             }
         },
         fileUploadEdit() {
+            this.checkAuth()
+
             this.checkRight()
 
             const filename = this.$refs.imageCurseEdit.$refs.input.files
@@ -1262,6 +1309,8 @@ export default {
             }
         },
         imageUploadCategory() {
+            this.checkAuth()
+
             this.checkRight()
 
             const filename = this.$refs.imageCategoryAdd.$refs.input.files
@@ -1276,6 +1325,8 @@ export default {
             }
         },
         imageUploadCategoryEdit() {
+            this.checkAuth()
+
             this.checkRight()
 
             const filename = this.$refs.imageCategoryEdit.$refs.input.files
@@ -1293,9 +1344,40 @@ export default {
             if(!this.rights.includes('ec_access_curse')) {
                 this.$router.go(-1)
             }
-        }
+        },
+        async checkAuth() {
+            if(this.$store.getters['eduCenter/getTokens'].refresh) {
+                const refresh = this.$store.getters['eduCenter/getTokens'].refresh
+                const payload = JSON.parse(base64.decode(this.$store.getters['eduCenter/getTokens'].access.split('.')[1]))
+
+                if(Math.ceil(Date.now()/1000) >= +payload.exp - 8) {
+                    const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/refresh`, {
+                        method: "POST",
+                        headers: {
+                            'Content-Type': 'application/json;charset=utf-8',
+                        },
+                        body: JSON.stringify({
+                            refresh: refresh,
+                            educational_center_id: this.$store.getters['eduCenter/getId'],
+                        })
+                    })
+                    const responsed = await result.json()
+                    if(responsed.ok) {
+                        this.$store.commit('eduCenter/authenticate', {
+                            educational_center_id: this.$store.getters['eduCenter/getId'],
+                            tokens: responsed.tokens
+                        })
+                    } else {
+                        this.$store.commit('eduCenter/logout')
+                        this.$router.push({path: `/edu-center/login`})
+                    }
+                }
+            }
+        },
     },
     async beforeMount() {
+        this.$store.commit('eduCenter/syncState')
+
         const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/accesses`, {
             method: "POST",
             headers: {
@@ -1334,6 +1416,9 @@ export default {
             this.trashBtnTitle = 'Корзина'
             return this.curseTable
         }
+    },
+    beforeDestroy() {
+        this.$store.commit('eduCenter/saveState')
     }
 }
 </script>

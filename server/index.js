@@ -5,6 +5,9 @@ const express = require("express")
 const cors = require('cors')
 const multer  = require('multer')
 const json2xls = require('json2xls')
+const jwt = require('jsonwebtoken')
+const signature = "FJWr"
+const base64 = require('base-64')
 
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {

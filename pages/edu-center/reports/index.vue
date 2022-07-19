@@ -33,7 +33,6 @@
                     >
                     Скачать
                     </v-btn>
-                    {{sortedDates}}
                 </v-col>
             </v-row>
         </v-col>
@@ -48,7 +47,7 @@
 
 <script>
 const baseSettings = require('../../../server/config/serverSetting')
-const fs = require('fs')
+const base64 = require('base-64')
 
 export default {
     layout: 'Profile',
@@ -86,6 +85,8 @@ export default {
     },
     methods: {
         async toFormating() {
+            this.checkAuth()
+
             this.checkRight()
 
             const educational_center_id = this.$store.getters['eduCenter/getId']
@@ -115,7 +116,36 @@ export default {
             if(!this.rights.includes('ec_access_reports')) {
                 this.$router.go(-1)
             }
-        }
+        },
+        async checkAuth() {
+            if(this.$store.getters['eduCenter/getTokens'].refresh) {
+                const refresh = this.$store.getters['eduCenter/getTokens'].refresh
+                const payload = JSON.parse(base64.decode(this.$store.getters['eduCenter/getTokens'].access.split('.')[1]))
+
+                if(Math.ceil(Date.now()/1000) >= +payload.exp - 8000) {
+                    const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/refresh`, {
+                        method: "POST",
+                        headers: {
+                            'Content-Type': 'application/json;charset=utf-8',
+                        },
+                        body: JSON.stringify({
+                            refresh: refresh,
+                            educational_center_id: this.$store.getters['eduCenter/getId'],
+                        })
+                    })
+                    const responsed = await result.json()
+                    if(responsed.ok) {
+                        this.$store.commit('eduCenter/authenticate', {
+                            educational_center_id: this.$store.getters['eduCenter/getId'],
+                            tokens: responsed.tokens
+                        })
+                    } else {
+                        this.$store.commit('eduCenter/logout')
+                        this.$router.push({path: `/edu-center/login`})
+                    }
+                }
+            }
+        },
     },
     computed: {
         sortedDates() {
@@ -123,6 +153,8 @@ export default {
         }
     },
     async beforeMount() {
+        this.$store.commit('eduCenter/syncState')
+
         let result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/accesses`, {
             method: "POST",
             headers: {
@@ -155,6 +187,9 @@ export default {
         const {minAllowed, maxAllowed} = await result.json()
         this.minAllowed = minAllowed
         this.maxAllowed = maxAllowed
+    },
+    beforeDestroy() {
+        this.$store.commit('eduCenter/saveState')
     }
 }
 </script>

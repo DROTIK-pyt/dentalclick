@@ -400,6 +400,7 @@
 
 <script>
 const baseSettings = require('../../../server/config/serverSetting')
+const base64 = require('base-64')
 
 export default {
     layout: 'Profile',
@@ -456,6 +457,8 @@ export default {
     },
     methods: {
         async editItem(item) {
+            this.checkAuth()
+
             this.checkRight()
 
             this.titleArticle = item.title
@@ -477,6 +480,8 @@ export default {
             this.isEdit = true           
         },
         deleteItem(item) {
+            this.checkAuth()
+
             this.checkRight()
 
             this.deletingTitle = item.title
@@ -484,6 +489,8 @@ export default {
             this.isDelete = true
         },
         async confirmDelete() {
+            this.checkAuth()
+
             this.checkRight()
 
             // удаляем
@@ -502,6 +509,8 @@ export default {
             this.isDelete = false
         },
         toDeleteRubric(item) {
+            this.checkAuth()
+
             this.checkRight()
 
             this.isDeleteRubric = true
@@ -509,6 +518,8 @@ export default {
             this.deleteRubricTitle = item.title
         },
         toEditRubric(item) {
+            this.checkAuth()
+
             this.checkRight()
 
             this.isEditRubric = true
@@ -516,6 +527,8 @@ export default {
             this.editRubricTitle = item.title
         },
         async confirmDeleteRubric() {
+            this.checkAuth()
+
             this.checkRight()
 
             this.isDeleteRubric = false
@@ -530,6 +543,8 @@ export default {
             this.rubricTable = this.rubricTable.filter(rubric => rubric.title != this.deleteRubricTitle)
         },
         cancelDelete() {
+            this.checkAuth()
+
             this.checkRight()
 
             // ничего не делаем
@@ -538,6 +553,8 @@ export default {
             this.deletingTitle = ""
         },
         cancelDeleteRubric() {
+            this.checkAuth()
+
             this.checkRight()
 
             this.isDeleteRubric = false
@@ -545,11 +562,15 @@ export default {
             this.deleteRubricTitle = ""
         },
         toAddArticle() {
+            this.checkAuth()
+
             this.checkRight()
 
             this.isAdd = true
         },
         async addArticle() {
+            this.checkAuth()
+
             this.checkRight()
             
             const educational_center_id = this.$store.getters['eduCenter/getId']
@@ -572,11 +593,15 @@ export default {
             this.isAdd = false
         },
         viewTrash() {
+            this.checkAuth()
+
             this.checkRight()
 
             this.$router.push({path: "trash"})
         },
         cancelAddArticle() {
+            this.checkAuth()
+
             this.checkRight()
 
             this.titleArticle = ""
@@ -584,6 +609,8 @@ export default {
             this.isAdd = false
         },
         cancelEditArticle() {
+            this.checkAuth()
+
             this.checkRight()
 
             this.titleArticle = ""
@@ -591,11 +618,15 @@ export default {
             this.isEdit = false
         },
         toAddRubric() {
+            this.checkAuth()
+
             this.checkRight()
 
             this.isAddRubric = true
         },
         async addRubric() {
+            this.checkAuth()
+
             this.checkRight()
 
             const educational_center_id = this.$store.getters['eduCenter/getId']
@@ -617,6 +648,8 @@ export default {
             this.isAddRubric = false
         },
         async editRubric() {
+            this.checkAuth()
+
             this.checkRight()
 
             const title = this.editRubricTitle
@@ -641,6 +674,8 @@ export default {
             this.isEditRubric = false
         },
         async saveArticle() {
+            this.checkAuth()
+
             this.checkRight()
 
             const editArticle = {
@@ -659,6 +694,8 @@ export default {
             this.isEdit = false
         },
         async getAllBlog() {
+            this.checkAuth()
+
             this.checkRight()
 
             const educational_center_id = this.$store.getters['eduCenter/getId']
@@ -678,6 +715,8 @@ export default {
             this.rubricTable = data.blogRubrics
         },
         async doRubrics() {
+            this.checkAuth()
+
             this.checkRight()
 
             this.isDoRubrics = true
@@ -686,9 +725,40 @@ export default {
             if(!this.rights.includes('ec_access_blog')) {
                 this.$router.go(-1)
             }
-        }
+        },
+        async checkAuth() {
+            if(this.$store.getters['eduCenter/getTokens'].refresh) {
+                const refresh = this.$store.getters['eduCenter/getTokens'].refresh
+                const payload = JSON.parse(base64.decode(this.$store.getters['eduCenter/getTokens'].access.split('.')[1]))
+
+                if(Math.ceil(Date.now()/1000) >= +payload.exp - 8) {
+                    const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/refresh`, {
+                        method: "POST",
+                        headers: {
+                            'Content-Type': 'application/json;charset=utf-8',
+                        },
+                        body: JSON.stringify({
+                            refresh: refresh,
+                            educational_center_id: this.$store.getters['eduCenter/getId'],
+                        })
+                    })
+                    const responsed = await result.json()
+                    if(responsed.ok) {
+                        this.$store.commit('eduCenter/authenticate', {
+                            educational_center_id: this.$store.getters['eduCenter/getId'],
+                            tokens: responsed.tokens
+                        })
+                    } else {
+                        this.$store.commit('eduCenter/logout')
+                        this.$router.push({path: `/edu-center/login`})
+                    }
+                }
+            }
+        },
     },
     async beforeMount() {
+        this.$store.commit('eduCenter/syncState')
+        
         const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/accesses`, {
             method: "POST",
             headers: {
@@ -705,6 +775,9 @@ export default {
         }
 
         this.getAllBlog()
+    },
+    beforeDestroy() {
+        this.$store.commit('eduCenter/saveState')
     }
 }
 </script>

@@ -41,21 +41,24 @@
 </template>
 
 <script>
+const baseSettings = require('../../server/config/serverSetting')
+const base64 = require('base-64')
 
 export default {
-    layout: 'eduLogin',
+    layout: 'empty',
     data() {
         return {
             login: "",
             password: "",
+            errors: [],
         }
     },
     methods: {
         async loginEdu() {
-            const response = await fetch("http://localhost:8888/edu-center/login", {
+            const response = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/login`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json;charset=utf-8',
                 },
                 body: JSON.stringify({
                     login: this.login,
@@ -64,15 +67,19 @@ export default {
             })
             const data = await response.json()
             if (data.ok) {
-                this.$store.commit('eduCenter/authenticate', data)
+                this.$store.commit('eduCenter/authenticate', {educational_center_id: data.educational_center_id, tokens: data.tokens})
                 this.$router.push({path: `/edu-center/profile`})
+            } else {
+                this.errors.push("Введены неккоректные данные")
             }
         },
     },
     beforeMount() {
         this.$store.commit('eduCenter/syncState')
         if (this.$store.getters['eduCenter/getIsAuth']) {
-            this.$router.push({path: `/edu-center/profile`})
+            setTimeout(() => {
+                this.$router.push({path: `/edu-center/profile`})
+            }, 300)
         }
     },
     beforeDestroy() {

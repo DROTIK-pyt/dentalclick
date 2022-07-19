@@ -1,14 +1,14 @@
 import Vue from "vue"
+const baseSettings = require('../server/config/serverSetting')
 
 export const state = () => ({
     profile: {
-        isAuth: true,
+        isAuth: false,
         tokens: {
-            access: null,
+            accessToken: null,
             refresh: null,
-            expires: 0
         },
-        id: 1,
+        educational_center_id: null,
     }   
 })
 
@@ -20,7 +20,7 @@ export const getters = {
         return state.profile.tokens
     },
     getId(state) {
-        return state.profile.id
+        return state.profile.educational_center_id
     }
 }
 
@@ -32,18 +32,15 @@ export const actions = {
 
 export const mutations = {
     authenticate(state, data) {
-        if (data.ok) {
-            state.profile.tokens = data.tokens
-            state.profile.isAuth = true
-            state.profile.id = data.id
-        }
+        state.profile.tokens = data.tokens
+        state.profile.isAuth = true
+        state.profile.educational_center_id = data.educational_center_id
     },
     logout(state) {
         state.profile.isAuth = false
         state.profile.tokens.access = null
         state.profile.tokens.refresh = null
-        state.profile.tokens.expires = 0
-        state.profile.id = 0
+        state.profile.educational_center_id = null
     },
     saveState(state) {
         localStorage.setItem('vuex', JSON.stringify(state.profile))
