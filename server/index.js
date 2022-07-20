@@ -28,7 +28,7 @@ app.use(express.json({ limit: '500kb', parameterLimit: 10000 })) // for parsing 
 app.use(express.urlencoded({ extended: true, limit: '500kb', parameterLimit: 10000 }))
 app.use(json2xls.middleware)
 
-app.use(express.static('static')); 
+app.use(express.static('static'))
 
 require('./edu-center/index')(app, upload) // Образовательный центр
 
