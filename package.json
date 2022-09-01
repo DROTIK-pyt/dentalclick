@@ -29,6 +29,11 @@
     "webpack": "^4.46.0"
   },
   "devDependencies": {
-    "@nuxtjs/vuetify": "^1.12.3"
+    "@nuxtjs/vuetify": "^1.12.3",
+    "css-loader": "^5.2.7",
+    "postcss": "^8.4.16",
+    "postcss-import": "^13.0.0",
+    "postcss-loader": "^4.3.0",
+    "postcss-url": "^10.1.3"
   }
 }

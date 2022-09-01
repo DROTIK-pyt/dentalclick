@@ -1,4 +1,5 @@
 import colors from 'vuetify/es5/util/colors'
+import ru from 'vuetify/lib/locale/ru'
 
 export default {
   // Global page headers: https://go.nuxtjs.dev/config-head
@@ -43,6 +44,7 @@ export default {
   // Vuetify module configuration: https://go.nuxtjs.dev/config-vuetify
   vuetify: {
     customVariables: ['~/assets/variables.scss'],
+    optionsPath: './vuetify-options.js',
     theme: {
       dark: false,
       themes: {
@@ -56,7 +58,11 @@ export default {
           success: colors.green.accent3
         }
       }
-    }
+    },
+    lang: { 
+        locales: { ru },
+        current: 'ru',
+    },
   },
 
   // Build Configuration: https://go.nuxtjs.dev/config-build

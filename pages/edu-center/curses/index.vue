@@ -959,6 +959,7 @@ export default {
                 this.editCurseImage = null
                 this.editCurseImagePreview = curse.image
                 this.editCurseUniqueSuffix = ""
+                this.editCurseCategories = []
                 const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/category`,{
                     method: "POST",
                     headers: {

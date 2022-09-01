@@ -273,13 +273,18 @@ module.exports = function(app, upload) {
             })
         }
         const cats = JSON.parse(req.body.categories)
+        aCurse = await curse.findOne({
+            where: {
+                curse_id: req.body.curse_id
+            }
+        })
 
         if(cats) {
             aCurse.setCategories(null)
 
             for(const cat of cats) {
                 const c = await category.findOne({where: {
-                    title: cat.title
+                    title: cat
                 }})
                 await aCurse.addCategory(c)
             }
