@@ -183,6 +183,10 @@ const doctor = sequelize.define('doctor', {
         type: DataTypes.STRING,
         allowNull: false,
     },
+    refresh_token: {
+        type: DataTypes.STRING,
+        allowNull: true,
+    },
     specialization: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -246,6 +250,8 @@ const moderation = sequelize.define('moderation', {
 moderation.belongsToMany(educationalCenter, {through: "moderEC"})
 educationalCenter.belongsToMany(moderation, {through: "moderEC"})
 
+doctor.belongsToMany(moderation, {through: "doctorModer"})
+moderation.belongsToMany(doctor, {through: "doctorModer"})
 
 module.exports = {
     dbBaseSetting,

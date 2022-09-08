@@ -175,6 +175,21 @@ CREATE TABLE IF NOT EXISTS `doctorcurse` (
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8;
 
 # ------------------------------------------------------------
+# SCHEMA DUMP FOR TABLE: doctormoder
+# ------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS `doctormoder` (
+  `createdAt` datetime NOT NULL,
+  `updatedAt` datetime NOT NULL,
+  `doctorDoctorId` int(11) NOT NULL,
+  `moderationModerationId` int(11) NOT NULL,
+  PRIMARY KEY (`doctorDoctorId`, `moderationModerationId`),
+  KEY `moderationModerationId` (`moderationModerationId`),
+  CONSTRAINT `doctormoder_ibfk_1` FOREIGN KEY (`doctorDoctorId`) REFERENCES `doctors` (`doctor_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `doctormoder_ibfk_2` FOREIGN KEY (`moderationModerationId`) REFERENCES `moderations` (`moderation_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8;
+
+# ------------------------------------------------------------
 # SCHEMA DUMP FOR TABLE: doctors
 # ------------------------------------------------------------
 
@@ -188,6 +203,7 @@ CREATE TABLE IF NOT EXISTS `doctors` (
   `specialization` varchar(255) NOT NULL,
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime NOT NULL,
+  `refresh_token` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`doctor_id`)
 ) ENGINE = InnoDB AUTO_INCREMENT = 3 DEFAULT CHARSET = utf8;
 
@@ -384,15 +400,6 @@ INSERT INTO
   )
 VALUES
   ('2022-09-01 00:51:12', '2022-09-01 00:51:12', 1, 4);
-INSERT INTO
-  `accessrightsec` (
-    `createdAt`,
-    `updatedAt`,
-    `educationalCenterEducationalCenterId`,
-    `accessRightAccessRightsId`
-  )
-VALUES
-  ('2022-09-01 00:51:12', '2022-09-01 00:51:12', 1, 5);
 
 # ------------------------------------------------------------
 # DATA DUMP FOR TABLE: articles
@@ -474,10 +481,10 @@ INSERT INTO
 VALUES
   (
     3,
-    '23423141234123412341234',
+    'category1',
     '/uploads/ad5bec98-131c-473b-86f9-cb3c9042cc54.jpg',
     '2022-08-31 22:02:29',
-    '2022-08-31 22:21:29'
+    '2022-09-03 10:18:58'
   );
 
 # ------------------------------------------------------------
@@ -533,7 +540,7 @@ INSERT INTO
     `statusCurseStatusId`
   )
 VALUES
-  ('2022-08-31 22:37:16', '2022-08-31 22:37:16', 6, 1);
+  ('2022-09-03 10:20:38', '2022-09-03 10:20:38', 6, 2);
 INSERT INTO
   `cursecursestatus` (
     `createdAt`,
@@ -622,95 +629,16 @@ VALUES
 # DATA DUMP FOR TABLE: doctorcurse
 # ------------------------------------------------------------
 
-INSERT INTO
-  `doctorcurse` (
-    `createdAt`,
-    `updatedAt`,
-    `doctorDoctorId`,
-    `curseCurseId`
-  )
-VALUES
-  ('2022-07-18 17:11:10', '2022-07-18 17:11:10', 1, 6);
-INSERT INTO
-  `doctorcurse` (
-    `createdAt`,
-    `updatedAt`,
-    `doctorDoctorId`,
-    `curseCurseId`
-  )
-VALUES
-  ('2022-07-18 17:18:23', '2022-07-18 17:18:23', 1, 7);
-INSERT INTO
-  `doctorcurse` (
-    `createdAt`,
-    `updatedAt`,
-    `doctorDoctorId`,
-    `curseCurseId`
-  )
-VALUES
-  ('2022-07-18 17:32:19', '2022-07-18 17:32:19', 2, 6);
-INSERT INTO
-  `doctorcurse` (
-    `createdAt`,
-    `updatedAt`,
-    `doctorDoctorId`,
-    `curseCurseId`
-  )
-VALUES
-  ('2022-07-18 17:32:03', '2022-07-18 17:32:03', 2, 7);
+
+# ------------------------------------------------------------
+# DATA DUMP FOR TABLE: doctormoder
+# ------------------------------------------------------------
+
 
 # ------------------------------------------------------------
 # DATA DUMP FOR TABLE: doctors
 # ------------------------------------------------------------
 
-INSERT INTO
-  `doctors` (
-    `doctor_id`,
-    `name`,
-    `phone`,
-    `email`,
-    `password`,
-    `region`,
-    `specialization`,
-    `createdAt`,
-    `updatedAt`
-  )
-VALUES
-  (
-    1,
-    'name1',
-    '2349828934',
-    'ex@mail.com',
-    '123',
-    'region1',
-    'specialization',
-    '2022-07-18 17:10:09',
-    '2022-07-18 17:10:09'
-  );
-INSERT INTO
-  `doctors` (
-    `doctor_id`,
-    `name`,
-    `phone`,
-    `email`,
-    `password`,
-    `region`,
-    `specialization`,
-    `createdAt`,
-    `updatedAt`
-  )
-VALUES
-  (
-    2,
-    'name2',
-    '2349828934',
-    'ex@mail.com',
-    '123',
-    'region2',
-    'specialization321',
-    '2022-07-18 17:10:09',
-    '2022-07-18 17:10:09'
-  );
 
 # ------------------------------------------------------------
 # DATA DUMP FOR TABLE: eccategory
@@ -802,9 +730,9 @@ VALUES
     'url',
     'requisites',
     'requisites\r\nrequisites',
-    'ed0c3c41-aaa5-4be5-8c56-210207829707',
+    'f6abf67b-3f1c-49a8-b3a7-ee69835c6390',
     '2022-07-17 23:11:06',
-    '2022-09-01 07:31:15'
+    '2022-09-08 19:34:57'
   );
 
 # ------------------------------------------------------------

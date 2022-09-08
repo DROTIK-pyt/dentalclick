@@ -32,6 +32,7 @@ app.use(express.static('static'))
 
 require('./edu-center/index')(app, upload) // Образовательный центр
 require('./general/index')(app, upload) // Глобальные запросы (скрытые)
+require('./doctor/index')(app, upload) // Доктора
 
 app.listen(baseSettings.port, () => {
     console.log(`Server start on ${baseSettings.baseUrl}:${baseSettings.port}/`)
