@@ -43,11 +43,11 @@ export const mutations = {
         state.profile.doctor_id = null
     },
     saveState(state) {
-        localStorage.setItem('vuex', JSON.stringify(state.profile))
+        localStorage.setItem('vuex-doc', JSON.stringify(state))
     },
     syncState(state) {
-        if (localStorage.getItem('vuex')) {
-            Vue.set(state, 'profile', JSON.parse(localStorage.getItem('vuex')))
+        if (localStorage.getItem('vuex-doc')) {
+            Vue.set(state, 'profile', JSON.parse(localStorage.getItem('vuex-doc')).profile)
         }
     }
 }

@@ -14,7 +14,7 @@ import headerDoc from '~/components/headers/headerDoc.vue'
 
 export default {
   name: 'ProfileLayout',
-  layout: 'Profile',
+  layout: 'ProfileDoc',
   components: {
     headerDoc,
   },

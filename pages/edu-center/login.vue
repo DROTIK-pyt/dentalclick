@@ -45,7 +45,7 @@ const baseSettings = require('../../server/config/serverSetting')
 const base64 = require('base-64')
 
 export default {
-    layout: 'empty',
+    layout: 'default',
     data() {
         return {
             login: "",

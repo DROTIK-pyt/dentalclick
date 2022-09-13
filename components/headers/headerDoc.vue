@@ -11,14 +11,12 @@
                     ></v-img>
                 </nuxt-link>
             </v-col>
-            <v-col class="right d-flex justify-space-between align-center" cols="12" sm="9" lg="5" offset-lg="4" tag="ul">
-                <nuxt-link class="header-link text-h6" to="curses" v-if="isShowCurses">Мои курсы</nuxt-link>
-                <nuxt-link class="header-link text-h6" to="reports" v-if="isShowReports">Мои отчеты</nuxt-link>
-                <nuxt-link class="header-link text-h6" to="blog" v-if="isShowBlog">Мой блог</nuxt-link>
+            <v-col class="right d-flex justify-end align-center" cols="12" sm="9" lg="5" offset-lg="4" tag="ul">
+                <nuxt-link class="header-link text-h6 mr-6" to="curses">Курсы</nuxt-link>
                 <v-btn
                 tile
                 color="error"
-                @click.prevent="eduLogout"
+                @click.prevent="docLogout"
                 >
                 <v-icon left>
                     mdi-exit-to-app
@@ -34,7 +32,7 @@
 const baseSettings = require('../../server/config/serverSetting')
 
 export default {
-    name: "headerEdu",
+    name: "headerDoc",
     data() {
         return {
             isShowCurses: true,
@@ -43,37 +41,37 @@ export default {
         }
     },
     methods: {
-        eduLogout() {
-            this.$store.commit('doctor/logout')
-            this.$store.commit('doctor/saveState')
+        docLogout() {
+            this.$store.commit('doctors/logout')
+            this.$store.commit('doctors/saveState')
             this.$router.push({path: "/doctor/login"})
         }
     },
     async beforeMount() {
-        const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/doctor/accesses`, {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json;charset=utf-8'
-            },
-            body: JSON.stringify({
-                educational_center_id: this.$store.getters['doctor/getId']
-            })
-        })
-        const {ecAccessRights} = await result.json()
+        // const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/doctor/accesses`, {
+        //     method: "POST",
+        //     headers: {
+        //         'Content-Type': 'application/json;charset=utf-8'
+        //     },
+        //     body: JSON.stringify({
+        //         educational_center_id: this.$store.getters['doctor/getId']
+        //     })
+        // })
+        // const {ecAccessRights} = await result.json()
 
-        let rights = []
-        for(const ecAccessRight of ecAccessRights) {
-            rights.push(ecAccessRight.type)
-        }
+        // let rights = []
+        // for(const ecAccessRight of ecAccessRights) {
+        //     rights.push(ecAccessRight.type)
+        // }
 
-        if(!rights.includes('ec_access_curse'))
-            this.isShowCurses = false
+        // if(!rights.includes('ec_access_curse'))
+        //     this.isShowCurses = false
             
-        if(!rights.includes('ec_access_reports'))
-            this.isShowReports = false
+        // if(!rights.includes('ec_access_reports'))
+        //     this.isShowReports = false
 
-        if(!rights.includes('ec_access_blog'))
-            this.isShowBlog = false
+        // if(!rights.includes('ec_access_blog'))
+        //     this.isShowBlog = false
     }
 }
 </script>

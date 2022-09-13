@@ -205,7 +205,7 @@ CREATE TABLE IF NOT EXISTS `doctors` (
   `updatedAt` datetime NOT NULL,
   `refresh_token` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`doctor_id`)
-) ENGINE = InnoDB AUTO_INCREMENT = 3 DEFAULT CHARSET = utf8;
+) ENGINE = InnoDB AUTO_INCREMENT = 2 DEFAULT CHARSET = utf8;
 
 # ------------------------------------------------------------
 # SCHEMA DUMP FOR TABLE: eccategory
@@ -639,6 +639,32 @@ VALUES
 # DATA DUMP FOR TABLE: doctors
 # ------------------------------------------------------------
 
+INSERT INTO
+  `doctors` (
+    `doctor_id`,
+    `name`,
+    `phone`,
+    `email`,
+    `password`,
+    `region`,
+    `specialization`,
+    `createdAt`,
+    `updatedAt`,
+    `refresh_token`
+  )
+VALUES
+  (
+    1,
+    'test',
+    '234512341234234',
+    'ex1@mail.ru',
+    '202cb962ac59075b964b07152d234b70',
+    'Moscow',
+    'Ортопедия',
+    '2022-09-13 11:40:30',
+    '2022-09-13 20:33:52',
+    '5651597f-769e-461e-a2eb-a713a57ce87c'
+  );
 
 # ------------------------------------------------------------
 # DATA DUMP FOR TABLE: eccategory
@@ -726,13 +752,13 @@ VALUES
     'person',
     '289347982374',
     'ex@mail.ru',
-    'c20ad4d76fe97759aa27a0c99bff6710',
+    '202cb962ac59075b964b07152d234b70',
     'url',
     'requisites',
     'requisites\r\nrequisites',
-    'f6abf67b-3f1c-49a8-b3a7-ee69835c6390',
+    'ed3d1381-3489-4e68-8460-36aba8ec95ef',
     '2022-07-17 23:11:06',
-    '2022-09-08 19:34:57'
+    '2022-09-12 15:44:25'
   );
 
 # ------------------------------------------------------------

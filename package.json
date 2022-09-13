@@ -22,6 +22,7 @@
     "mysql-import": "^5.0.21",
     "mysql2": "^2.3.3",
     "mysqldump": "^3.2.0",
+    "nodemailer": "^6.7.8",
     "nuxt": "^2.15.8",
     "sequelize": "^6.21.2",
     "uuid": "^8.3.2",

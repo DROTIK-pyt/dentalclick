@@ -43,11 +43,11 @@ export const mutations = {
         state.profile.educational_center_id = null
     },
     saveState(state) {
-        localStorage.setItem('vuex', JSON.stringify(state.profile))
+        localStorage.setItem('vuex-edu', JSON.stringify(state))
     },
     syncState(state) {
-        if (localStorage.getItem('vuex')) {
-            Vue.set(state, 'profile', JSON.parse(localStorage.getItem('vuex')))
+        if (localStorage.getItem('vuex-edu')) {
+            Vue.set(state, 'profile', JSON.parse(localStorage.getItem('vuex-edu')).profile)
         }
     }
 }

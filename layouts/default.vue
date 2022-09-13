@@ -10,8 +10,8 @@
 
 <script>
 export default {
-  name: 'empty',
-  layout: "emptyLayout",
+  name: 'dafault',
+  layout: "dafaultLayout",
   components: {
   },
   beforeMount() {

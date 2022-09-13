@@ -30,6 +30,7 @@ app.use(json2xls.middleware)
 
 app.use(express.static('static'))
 
+require('./sendMail')(app, upload) // Отправка сообщений на почту
 require('./edu-center/index')(app, upload) // Образовательный центр
 require('./general/index')(app, upload) // Глобальные запросы (скрытые)
 require('./doctor/index')(app, upload) // Доктора

@@ -13,7 +13,7 @@ module.exports = function(app, upload) {
                 doctor_id: req.body.doctor_id
             }
         })
-        res.json({doc})
+        res.json({info: doc})
     })
 
     app.post('/doctor/login', async (req, res) => {
@@ -32,7 +32,7 @@ module.exports = function(app, upload) {
                 refresh_token: refresh
             }, {
                 where: {
-                    doctor_id: ec.doctor_id
+                    doctor_id: doc.doctor_id
                 }
             })
 
@@ -81,13 +81,78 @@ module.exports = function(app, upload) {
                 refresh_token: refresh
             }, {
                 where: {
-                    doctor_id: ec.doctor_id
+                    doctor_id: doc.doctor_id
                 }
             })
 
             res.json({ok: true, doc: doc, tokens: {refresh, access}})
         } else {
             res.json({ok: false})
+        }
+    })
+
+    app.post('/doctor/subscribe', async (req, res) => {
+
+        const { curse_id, doctor_id } = req.body
+
+        const doc = await doctor.findOne({
+            where: {
+                doctor_id: doctor_id,
+            }
+        })
+        const aCurse = await curse.findOne({
+            where: {
+                curse_id: curse_id
+            }
+        })
+
+        if(doc) {
+            await doc.addCurse(aCurse)
+            res.json({ok: true})
+        } else {
+            res.json({ok: false})
+        }
+    })
+
+    app.post('/doctor/unsubscribe', async (req, res) => {
+
+        const { curse_id, doctor_id } = req.body
+
+        const doc = await doctor.findOne({
+            where: {
+                doctor_id: doctor_id,
+            }
+        })
+        
+        if(doc) {
+            const subsCurses = await doc.getCurses({
+                where: {
+                    curse_id: {[Op.ne]: curse_id}
+                }
+            })
+            await doc.setCurses([])
+            await doc.setCurses(subsCurses)
+
+            res.json({ok: true})
+        } else {
+            res.json({ok: false})
+        }
+    })
+
+    app.post('/doctor/curse', async (req, res) => {
+
+        const { curse_id } = req.body
+
+        const aCurse = await curse.findOne({
+            where: {
+                curse_id: curse_id,
+            }
+        })
+        
+        if(aCurse) {
+            res.json({ok: true, curse: aCurse})
+        } else {
+            res.json({ok: false, curse: null})
         }
     })
 }
