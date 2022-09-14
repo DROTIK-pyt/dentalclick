@@ -91,6 +91,19 @@ module.exports = function(app, upload) {
         }
     })
 
+    app.get('/doctor/all-centers', async (req, res) => {
+        const centers = await educationalCenter.findAll()
+        const result = []
+        centers.forEach(center => {
+            result.push({
+                educational_center_id: center.educational_center_id,
+                title: center.title
+            })
+        })
+
+        res.json({ok: true, centers: result})
+    })
+
     app.post('/doctor/subscribe', async (req, res) => {
 
         const { curse_id, doctor_id } = req.body
@@ -153,6 +166,46 @@ module.exports = function(app, upload) {
             res.json({ok: true, curse: aCurse})
         } else {
             res.json({ok: false, curse: null})
+        }
+    })
+
+    app.post('/doctor/all-curses', async (req, res) => {
+        const { educational_center_ids, doctor_id } = req.body
+
+        if(educational_center_ids) {
+            const centersWithCurses = await educationalCenter.findAll({
+                where: {
+                    educational_center_id: { [Op.or]: educational_center_ids }
+                },
+                include: curse
+            })
+            const doc = await doctor.findOne({
+                where: {
+                    doctor_id
+                }
+            })
+            const docSubscribedCurses = await doc.getCurses()
+
+            const result = []
+            centersWithCurses.forEach(centersWithCurse => {
+                centersWithCurse.curses.forEach(curse => {
+                    result.push({
+                        curse_id: curse.curse_id,
+                        title: curse.title,
+                        eduCenter: centersWithCurse.title,
+                        lector: curse.lector,
+                        date_start: curse.date_start,
+                        date_end: curse.date_end,
+                        price: curse.price,
+                        score: curse.score,
+                        isSubscribed: !!docSubscribedCurses.find(c => c.curse_id === curse.curse_id)
+                    })
+                })
+            })
+
+            res.json({ok: true, curses: result})
+        } else {
+            res.json({ok: true, curses: []})
         }
     })
 }

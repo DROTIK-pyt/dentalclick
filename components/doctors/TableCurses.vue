@@ -57,7 +57,7 @@
         </v-icon>
         <v-icon
             small
-            @click="toShowCurseProgramm(item.curse_id)"
+            @click='$emit("showProgramm", item.curse_id)'
         >
             mdi-eye
         </v-icon>
@@ -79,45 +79,37 @@ export default {
     methods: {
         toSubscribeOnCurse(curse_id) {
             this.curses.forEach(async curse => {
-                if (curse_id === curse.curse_id) {
-                    const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/doctor/subscribe`, {
-                        method: "POST",
-                        headers: {
-                            'Content-Type': 'application/json;charset=utf-8',
-                        },
-                        body: JSON.stringify({
-                            curse_id: curse_id,
-                            doctor_id: this.$store.getters['doctors/getId'],
-                        })
+                const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/doctor/subscribe`, {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json;charset=utf-8',
+                    },
+                    body: JSON.stringify({
+                        curse_id: curse_id,
+                        doctor_id: this.$store.getters['doctors/getId'],
                     })
-                    const response = await result.json()
-                    if(response.ok)
-                        curse.isSubscribed = true
-                }
+                })
+                const response = await result.json()
+                if(response.ok)
+                    curse.isSubscribed = true
             })
         },
         toUnSubscribeOnCurse(curse_id) {
-            console.log('toUnSubscribeOnCurse')
             this.curses.forEach(async curse => {
-                if (curse_id === curse.curse_id) {
-                    const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/doctor/unsubscribe`, {
-                        method: "POST",
-                        headers: {
-                            'Content-Type': 'application/json;charset=utf-8',
-                        },
-                        body: JSON.stringify({
-                            curse_id: curse_id,
-                            doctor_id: this.$store.getters['doctors/getId'],
-                        })
+                const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/doctor/unsubscribe`, {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json;charset=utf-8',
+                    },
+                    body: JSON.stringify({
+                        curse_id: curse_id,
+                        doctor_id: this.$store.getters['doctors/getId'],
                     })
-                    const response = await result.json()
-                    if(response.ok)
-                        curse.isSubscribed = false
-                }
+                })
+                const response = await result.json()
+                if(response.ok)
+                    curse.isSubscribed = false
             })
-        },
-        toShowCurseProgramm(curse_id) {
-            this.$emit("showProgramm", curse_id)
         },
     }
 }

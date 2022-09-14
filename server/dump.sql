@@ -94,6 +94,16 @@ CREATE TABLE IF NOT EXISTS `categories` (
 ) ENGINE = InnoDB AUTO_INCREMENT = 4 DEFAULT CHARSET = utf8;
 
 # ------------------------------------------------------------
+# SCHEMA DUMP FOR TABLE: curse_statuses
+# ------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS `curse_statuses` (
+  `curse_status_id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  PRIMARY KEY (`curse_status_id`)
+) ENGINE = InnoDB DEFAULT CHARSET = utf8;
+
+# ------------------------------------------------------------
 # SCHEMA DUMP FOR TABLE: cursecategory
 # ------------------------------------------------------------
 
@@ -200,10 +210,10 @@ CREATE TABLE IF NOT EXISTS `doctors` (
   `email` varchar(255) NOT NULL,
   `password` varchar(255) NOT NULL,
   `region` varchar(255) NOT NULL,
+  `refresh_token` varchar(255) DEFAULT NULL,
   `specialization` varchar(255) NOT NULL,
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime NOT NULL,
-  `refresh_token` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`doctor_id`)
 ) ENGINE = InnoDB AUTO_INCREMENT = 2 DEFAULT CHARSET = utf8;
 
@@ -488,6 +498,11 @@ VALUES
   );
 
 # ------------------------------------------------------------
+# DATA DUMP FOR TABLE: curse_statuses
+# ------------------------------------------------------------
+
+
+# ------------------------------------------------------------
 # DATA DUMP FOR TABLE: cursecategory
 # ------------------------------------------------------------
 
@@ -629,6 +644,24 @@ VALUES
 # DATA DUMP FOR TABLE: doctorcurse
 # ------------------------------------------------------------
 
+INSERT INTO
+  `doctorcurse` (
+    `createdAt`,
+    `updatedAt`,
+    `doctorDoctorId`,
+    `curseCurseId`
+  )
+VALUES
+  ('2022-09-14 14:01:24', '2022-09-14 14:01:24', 1, 6);
+INSERT INTO
+  `doctorcurse` (
+    `createdAt`,
+    `updatedAt`,
+    `doctorDoctorId`,
+    `curseCurseId`
+  )
+VALUES
+  ('2022-09-14 11:12:30', '2022-09-14 11:12:30', 1, 7);
 
 # ------------------------------------------------------------
 # DATA DUMP FOR TABLE: doctormoder
@@ -647,10 +680,10 @@ INSERT INTO
     `email`,
     `password`,
     `region`,
+    `refresh_token`,
     `specialization`,
     `createdAt`,
-    `updatedAt`,
-    `refresh_token`
+    `updatedAt`
   )
 VALUES
   (
@@ -660,10 +693,10 @@ VALUES
     'ex1@mail.ru',
     '202cb962ac59075b964b07152d234b70',
     'Moscow',
+    '4f06b0a5-e20c-4138-83a0-21241350ecfe',
     'Ортопедия',
     '2022-09-13 11:40:30',
-    '2022-09-13 20:33:52',
-    '5651597f-769e-461e-a2eb-a713a57ce87c'
+    '2022-09-14 11:10:56'
   );
 
 # ------------------------------------------------------------

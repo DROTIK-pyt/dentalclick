@@ -19,10 +19,10 @@ export default {
     headerDoc,
   },
   beforeMount() {
-    this.$store.commit('doctor/syncState')
+    this.$store.commit('doctors/syncState')
   },
   beforeDestroy() {
-    this.$store.commit('doctor/saveState')
+    this.$store.commit('doctors/saveState')
   }
 }
 </script>

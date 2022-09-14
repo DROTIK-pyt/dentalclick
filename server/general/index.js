@@ -1,14 +1,15 @@
 module.exports = function(app, upload) {
+    const dbBaseSetting = require('../config/dbBaseSetting')
+
     app.get('/dumb-db', async (req, res) => {
-        var mysqldump = require('mysqldump');
-        var fs = require('fs');
+        var mysqldump = require('mysqldump')
          
         mysqldump({
             connection: {
-                host: 'localhost',
-                user: 'root',
-                password: 'root',
-                database: 'dentalclick',
+                host: dbBaseSetting.host,
+                user: dbBaseSetting.user,
+                password: dbBaseSetting.password,
+                database: dbBaseSetting.dataBase,
             },
             dumpToFile: './dump.sql',
         })
@@ -19,10 +20,10 @@ module.exports = function(app, upload) {
         const Importer = require('mysql-import')
 
         const connection = {
-            host: 'localhost',
-            user: 'root',
-            password: 'root',
-            database: 'dentalclick',
+            host: dbBaseSetting.host,
+            user: dbBaseSetting.user,
+            password: dbBaseSetting.password,
+            database: dbBaseSetting.dataBase,
         }
         const importer = new Importer(connection)
          

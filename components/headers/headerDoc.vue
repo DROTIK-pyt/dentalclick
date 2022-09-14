@@ -12,7 +12,7 @@
                 </nuxt-link>
             </v-col>
             <v-col class="right d-flex justify-end align-center" cols="12" sm="9" lg="5" offset-lg="4" tag="ul">
-                <nuxt-link class="header-link text-h6 mr-6" to="curses">Курсы</nuxt-link>
+                <nuxt-link class="header-link text-h6 mr-6" to="my-curses">Курсы</nuxt-link>
                 <v-btn
                 tile
                 color="error"

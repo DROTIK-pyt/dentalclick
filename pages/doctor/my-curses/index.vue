@@ -1,9 +1,9 @@
 <template>
     <v-row>
-        <v-col cols="12" sm="6">
+        <v-col cols="12" sm="9">
         <v-select
           v-model="currentEduCenters"
-          :items="eduCenters"
+          :items="eduCentersItems"
           :menu-props="{ maxHeight: '400' }"
           label="Выберите образовательные центры"
           multiple
@@ -52,6 +52,7 @@ export default {
 
             searchCurse: "",
             eduCenters: [],
+            eduCentersItems: [],
             currentEduCenters: [],
             curseHeaders: [
                 {
@@ -103,19 +104,7 @@ export default {
                     value: 'actions',
                 },
             ],
-            curses: [
-                {
-                    curse_id: 0,
-                    title: "",
-                    eduCenter: "",
-                    lector: "",
-                    date_start: "",
-                    date_end: "",
-                    price: "",
-                    score: "",
-                    isSubscribed: true
-                },
-            ],
+            curses: [],
         }
     },
     methods: {
@@ -148,10 +137,38 @@ export default {
                 }
             }
         },
-        async getAllEduCenters() {},
-        async getAllCursesViaECId(educational_center_id) {}, 
+        async getAllEduCenters() {
+            const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/doctor/all-centers`)
+
+            const responsed = await result.json()
+            if(responsed.ok) {
+                this.eduCenters = responsed.centers
+                this.eduCenters.forEach(center => {
+                    this.eduCentersItems.push(center.title)
+                })
+            }
+        },
+        async getAllCursesViaECId(educational_center_ids) {
+            const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/doctor/all-curses`, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8',
+                },
+                body: JSON.stringify({
+                    educational_center_ids,
+                    doctor_id: this.$store.getters['doctors/getId'],
+                })
+            })
+            const responsed = await result.json()
+
+            if(responsed.ok) {
+                this.curses = responsed.curses
+            }
+        }, 
         async getAllData() {
             this.checkAuth()
+
+            this.getAllEduCenters()
         },
         async showProgramm(curse_id) {
             const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/doctor/curse`, {
@@ -193,6 +210,21 @@ export default {
             this.contentCurseProgramm.score = null
             this.contentCurseProgramm.image = null
         },
+    },
+    watch: {
+        currentEduCenters(values) {
+            if (values.length) {
+                const ids = []
+                values.forEach(value => {
+                    const eduCenter = this.eduCenters.find(center => center.title === value)
+                    
+                    ids.push(eduCenter.educational_center_id)
+                })
+                this.getAllCursesViaECId(ids)
+            } else {
+                this.curses = []
+            }
+        }
     },
     beforeMount() {
         this.getAllData()
