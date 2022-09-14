@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS `categories` (
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime NOT NULL,
   PRIMARY KEY (`category_id`)
-) ENGINE = InnoDB AUTO_INCREMENT = 4 DEFAULT CHARSET = utf8;
+) ENGINE = InnoDB AUTO_INCREMENT = 5 DEFAULT CHARSET = utf8;
 
 # ------------------------------------------------------------
 # SCHEMA DUMP FOR TABLE: curse_statuses
@@ -152,7 +152,7 @@ CREATE TABLE IF NOT EXISTS `curses` (
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime NOT NULL,
   PRIMARY KEY (`curse_id`)
-) ENGINE = InnoDB AUTO_INCREMENT = 8 DEFAULT CHARSET = utf8;
+) ENGINE = InnoDB AUTO_INCREMENT = 9 DEFAULT CHARSET = utf8;
 
 # ------------------------------------------------------------
 # SCHEMA DUMP FOR TABLE: doctorar
@@ -289,7 +289,7 @@ CREATE TABLE IF NOT EXISTS `educational_centers` (
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime NOT NULL,
   PRIMARY KEY (`educational_center_id`)
-) ENGINE = InnoDB AUTO_INCREMENT = 2 DEFAULT CHARSET = utf8;
+) ENGINE = InnoDB AUTO_INCREMENT = 3 DEFAULT CHARSET = utf8;
 
 # ------------------------------------------------------------
 # SCHEMA DUMP FOR TABLE: moderations
@@ -410,6 +410,33 @@ INSERT INTO
   )
 VALUES
   ('2022-09-01 00:51:12', '2022-09-01 00:51:12', 1, 4);
+INSERT INTO
+  `accessrightsec` (
+    `createdAt`,
+    `updatedAt`,
+    `educationalCenterEducationalCenterId`,
+    `accessRightAccessRightsId`
+  )
+VALUES
+  ('2022-09-14 21:28:15', '2022-09-14 21:28:15', 2, 1);
+INSERT INTO
+  `accessrightsec` (
+    `createdAt`,
+    `updatedAt`,
+    `educationalCenterEducationalCenterId`,
+    `accessRightAccessRightsId`
+  )
+VALUES
+  ('2022-09-14 21:28:15', '2022-09-14 21:28:15', 2, 2);
+INSERT INTO
+  `accessrightsec` (
+    `createdAt`,
+    `updatedAt`,
+    `educationalCenterEducationalCenterId`,
+    `accessRightAccessRightsId`
+  )
+VALUES
+  ('2022-09-14 21:28:44', '2022-09-14 21:28:44', 2, 3);
 
 # ------------------------------------------------------------
 # DATA DUMP FOR TABLE: articles
@@ -496,6 +523,22 @@ VALUES
     '2022-08-31 22:02:29',
     '2022-09-03 10:18:58'
   );
+INSERT INTO
+  `categories` (
+    `category_id`,
+    `title`,
+    `image`,
+    `createdAt`,
+    `updatedAt`
+  )
+VALUES
+  (
+    4,
+    'test',
+    '/uploads/048a9b77-7386-46a6-9973-9a3c94344f20.jpg',
+    '2022-09-14 18:29:25',
+    '2022-09-14 18:29:25'
+  );
 
 # ------------------------------------------------------------
 # DATA DUMP FOR TABLE: curse_statuses
@@ -542,6 +585,15 @@ INSERT INTO
   )
 VALUES
   ('2022-08-31 22:37:08', '2022-08-31 22:37:08', 7, 3);
+INSERT INTO
+  `cursecategory` (
+    `createdAt`,
+    `updatedAt`,
+    `curseCurseId`,
+    `categoryCategoryId`
+  )
+VALUES
+  ('2022-09-14 18:30:02', '2022-09-14 18:30:02', 8, 4);
 
 # ------------------------------------------------------------
 # DATA DUMP FOR TABLE: cursecursestatus
@@ -565,6 +617,15 @@ INSERT INTO
   )
 VALUES
   ('2022-07-18 14:17:12', '2022-07-18 14:17:12', 7, 1);
+INSERT INTO
+  `cursecursestatus` (
+    `createdAt`,
+    `updatedAt`,
+    `curseCurseId`,
+    `statusCurseStatusId`
+  )
+VALUES
+  ('2022-09-14 18:30:02', '2022-09-14 18:30:02', 8, 1);
 
 # ------------------------------------------------------------
 # DATA DUMP FOR TABLE: curses
@@ -634,6 +695,38 @@ VALUES
     '2022-07-18 14:17:12',
     '2022-08-31 22:37:08'
   );
+INSERT INTO
+  `curses` (
+    `curse_id`,
+    `title`,
+    `program`,
+    `town`,
+    `address`,
+    `lector`,
+    `date_start`,
+    `date_end`,
+    `price`,
+    `score`,
+    `image`,
+    `createdAt`,
+    `updatedAt`
+  )
+VALUES
+  (
+    8,
+    'asdasdasdasd afsdfasdfasdf',
+    'asdasdasdasd afsdfasdfasdf\r\nasdasdasdasd afsdfasdfasdf\r\nasdasdasdasd afsdfasdfasdf\r\nasdasdasdasd afsdfasdfasdf',
+    'Краснодар',
+    'Центральная',
+    'Лектор1',
+    '2022-09-14',
+    '2022-09-30',
+    '3425234',
+    0,
+    '/uploads/9a21ed45-f98d-4128-a4c5-23eea5c564b3.jpg',
+    '2022-09-14 18:30:02',
+    '2022-09-14 18:30:02'
+  );
 
 # ------------------------------------------------------------
 # DATA DUMP FOR TABLE: doctorar
@@ -652,7 +745,7 @@ INSERT INTO
     `curseCurseId`
   )
 VALUES
-  ('2022-09-14 14:01:24', '2022-09-14 14:01:24', 1, 6);
+  ('2022-09-14 18:20:18', '2022-09-14 18:20:18', 1, 6);
 INSERT INTO
   `doctorcurse` (
     `createdAt`,
@@ -661,7 +754,16 @@ INSERT INTO
     `curseCurseId`
   )
 VALUES
-  ('2022-09-14 11:12:30', '2022-09-14 11:12:30', 1, 7);
+  ('2022-09-14 18:20:17', '2022-09-14 18:20:17', 1, 7);
+INSERT INTO
+  `doctorcurse` (
+    `createdAt`,
+    `updatedAt`,
+    `doctorDoctorId`,
+    `curseCurseId`
+  )
+VALUES
+  ('2022-09-14 18:30:42', '2022-09-14 18:30:42', 1, 8);
 
 # ------------------------------------------------------------
 # DATA DUMP FOR TABLE: doctormoder
@@ -693,10 +795,10 @@ VALUES
     'ex1@mail.ru',
     '202cb962ac59075b964b07152d234b70',
     'Moscow',
-    '4f06b0a5-e20c-4138-83a0-21241350ecfe',
+    '7e425d4d-f104-4e95-aa93-a57a371ac37d',
     'Ортопедия',
     '2022-09-13 11:40:30',
-    '2022-09-14 11:10:56'
+    '2022-09-14 18:30:28'
   );
 
 # ------------------------------------------------------------
@@ -721,6 +823,15 @@ INSERT INTO
   )
 VALUES
   ('2022-08-31 22:02:29', '2022-08-31 22:02:29', 1, 3);
+INSERT INTO
+  `eccategory` (
+    `createdAt`,
+    `updatedAt`,
+    `educationalCenterEducationalCenterId`,
+    `categoryCategoryId`
+  )
+VALUES
+  ('2022-09-14 18:29:25', '2022-09-14 18:29:25', 2, 4);
 
 # ------------------------------------------------------------
 # DATA DUMP FOR TABLE: eccurse
@@ -744,6 +855,15 @@ INSERT INTO
   )
 VALUES
   ('2022-07-18 14:17:12', '2022-07-18 14:17:12', 1, 7);
+INSERT INTO
+  `eccurse` (
+    `createdAt`,
+    `updatedAt`,
+    `educationalCenterEducationalCenterId`,
+    `curseCurseId`
+  )
+VALUES
+  ('2022-09-14 18:30:02', '2022-09-14 18:30:02', 2, 8);
 
 # ------------------------------------------------------------
 # DATA DUMP FOR TABLE: ecrubrics
@@ -792,6 +912,36 @@ VALUES
     'ed3d1381-3489-4e68-8460-36aba8ec95ef',
     '2022-07-17 23:11:06',
     '2022-09-12 15:44:25'
+  );
+INSERT INTO
+  `educational_centers` (
+    `educational_center_id`,
+    `title`,
+    `contact_person`,
+    `phone`,
+    `email`,
+    `password`,
+    `site_url`,
+    `requisites`,
+    `add_notes`,
+    `refresh_token`,
+    `createdAt`,
+    `updatedAt`
+  )
+VALUES
+  (
+    2,
+    'text123',
+    'IVAN',
+    '23894890234902394',
+    'ex2@mail.ru',
+    '202cb962ac59075b964b07152d234b70',
+    '///',
+    'requisites\r\nrequisites',
+    'requisites',
+    '7d0e7f06-8d19-41e9-8985-d009385efb89',
+    '2022-09-14 21:27:17',
+    '2022-09-14 18:27:55'
   );
 
 # ------------------------------------------------------------

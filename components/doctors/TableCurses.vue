@@ -41,22 +41,6 @@
         <template v-slot:item.actions="{ item }">
         <v-icon
             small
-            class="mr-2"
-            v-if="!item.isSubscribed"
-            @click="toSubscribeOnCurse(item.curse_id)"
-        >
-            mdi-playlist-check
-        </v-icon>
-        <v-icon
-            small
-            class="mr-2"
-            v-else
-            @click="toUnSubscribeOnCurse(item.curse_id)"
-        >
-            mdi-playlist-remove
-        </v-icon>
-        <v-icon
-            small
             @click='$emit("showProgramm", item.curse_id)'
         >
             mdi-eye
@@ -72,45 +56,8 @@ export default {
     name: "TableCurses",
     props: [ 'searchCurse', 'curseHeaders', 'curses' ],
     data() {
-        return {
-
-        }
+        return {}
     },
-    methods: {
-        toSubscribeOnCurse(curse_id) {
-            this.curses.forEach(async curse => {
-                const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/doctor/subscribe`, {
-                    method: "POST",
-                    headers: {
-                        'Content-Type': 'application/json;charset=utf-8',
-                    },
-                    body: JSON.stringify({
-                        curse_id: curse_id,
-                        doctor_id: this.$store.getters['doctors/getId'],
-                    })
-                })
-                const response = await result.json()
-                if(response.ok)
-                    curse.isSubscribed = true
-            })
-        },
-        toUnSubscribeOnCurse(curse_id) {
-            this.curses.forEach(async curse => {
-                const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/doctor/unsubscribe`, {
-                    method: "POST",
-                    headers: {
-                        'Content-Type': 'application/json;charset=utf-8',
-                    },
-                    body: JSON.stringify({
-                        curse_id: curse_id,
-                        doctor_id: this.$store.getters['doctors/getId'],
-                    })
-                })
-                const response = await result.json()
-                if(response.ok)
-                    curse.isSubscribed = false
-            })
-        },
-    }
+    methods: {}
 }
 </script>

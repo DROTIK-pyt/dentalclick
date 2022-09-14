@@ -47,6 +47,7 @@ export default {
                 date_end: "",
                 price: "",
                 score: "",
+                isSubscribed: false,
                 image: "",
             },
 
@@ -138,6 +139,8 @@ export default {
             }
         },
         async getAllEduCenters() {
+            this.checkAuth()
+
             const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/doctor/all-centers`)
 
             const responsed = await result.json()
@@ -149,6 +152,8 @@ export default {
             }
         },
         async getAllCursesViaECId(educational_center_ids) {
+            this.checkAuth()
+
             const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/doctor/all-curses`, {
                 method: "POST",
                 headers: {
@@ -171,6 +176,8 @@ export default {
             this.getAllEduCenters()
         },
         async showProgramm(curse_id) {
+            this.checkAuth()
+
             const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/doctor/curse`, {
                 method: "POST",
                 headers: {
@@ -178,10 +185,12 @@ export default {
                 },
                 body: JSON.stringify({
                     curse_id: curse_id,
+                    doctor_id: this.$store.getters['doctors/getId'],
                 })
             })
             const response = await result.json()
             if (response.ok) {
+                this.contentCurseProgramm.curse_id = curse_id
                 this.contentCurseProgramm.title = response.curse.title
                 this.contentCurseProgramm.program = response.curse.program
                 this.contentCurseProgramm.town = response.curse.town
@@ -191,12 +200,15 @@ export default {
                 this.contentCurseProgramm.date_end = response.curse.date_end
                 this.contentCurseProgramm.price = response.curse.price
                 this.contentCurseProgramm.score = response.curse.score
+                this.contentCurseProgramm.isSubscribed = response.isSubscribed
                 this.contentCurseProgramm.image = response.curse.image
 
                 this.isShowCurseProgramm = true
             }
         },
         async closeProgramm() {
+            this.checkAuth()
+
             this.isShowCurseProgramm = false
 
             this.contentCurseProgramm.title = null
@@ -213,6 +225,8 @@ export default {
     },
     watch: {
         currentEduCenters(values) {
+            this.checkAuth()
+            
             if (values.length) {
                 const ids = []
                 values.forEach(value => {

@@ -154,18 +154,28 @@ module.exports = function(app, upload) {
 
     app.post('/doctor/curse', async (req, res) => {
 
-        const { curse_id } = req.body
+        const { curse_id, doctor_id } = req.body
 
         const aCurse = await curse.findOne({
             where: {
                 curse_id: curse_id,
             }
         })
+        const doc = await doctor.findOne({
+            where: {
+                doctor_id
+            }
+        })
+        const docSubscribedCurses = await doc.getCurses()
         
         if(aCurse) {
-            res.json({ok: true, curse: aCurse})
+            res.json({
+                ok: true,
+                curse: aCurse,
+                isSubscribed: !!docSubscribedCurses.find(c => c.curse_id === curse_id),
+            })
         } else {
-            res.json({ok: false, curse: null})
+            res.json({ok: false, curse: null, isSubscribed: null})
         }
     })
 
