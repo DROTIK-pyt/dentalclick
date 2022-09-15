@@ -18,6 +18,7 @@ module.exports = function(app, upload) {
     })
 
     app.post('/doctor/login', async (req, res) => {
+        
         const doc = await doctor.findOne({
             where: {
                 email: req.body.login,
@@ -37,6 +38,17 @@ module.exports = function(app, upload) {
                 }
             })
 
+            const text = `
+                <h4>Кто-то авторизовался в вашем аккаунте.</h4>
+                <p>Если это были не вы, то как можно скорее свяжитесь с нами.</p>
+            `
+
+            sendEmail(
+                doc.email,
+                "Авторизация в аккаунте",
+                text
+            )
+
             res.json({ok: true, doctor_id: doc.doctor_id, tokens: {refresh, access}})
 
         } else {
@@ -51,17 +63,36 @@ module.exports = function(app, upload) {
             email: req.body.email,
             password: req.body.password,
             region: req.body.region,
-            specialization: req.body.specialization,
-            refresh_token: null
+            specialization: req.body.specialization
         }
-        
-        const doc = await doctor.create(data)
+
+        if(!req.body.name ||
+           !req.body.phone ||
+           !req.body.email ||
+           !req.body.password ||
+           !req.body.region ||
+           !req.body.specialization) {
+            res.json({ok: false})
+            return
+        }
 
         const newModerate = await moderation.create({
-            new_information: JSON.stringify(doc)
+            new_information: JSON.stringify({
+                type: "register-new-doctor",
+                id: -1,
+                newInfo: data
+            })
         })
 
-        await doc.addModeration(newModerate)
+        const text = `
+            <h4>Спасибо за регистрацию, мы уже получили Вашу информацию и начали ее проверку. При необходимости, с Вами свяжутся.</h4>
+        `
+
+        sendEmail(
+            req.body.email,
+            "Спасибо за регистрацию!",
+            text
+        )
 
         res.json({ok: true})
     })
@@ -248,6 +279,40 @@ module.exports = function(app, upload) {
         sendEmail(
             doc.email,
             "Изменение профиля (в работе)",
+            text
+        )
+
+        res.json({ok: true})
+    })
+
+    app.put('/doctor/change-accesses', async (req, res) => {
+
+        const { doctor_id } = req.body
+
+        const doc = await doctor.findOne({
+            where: {
+                doctor_id
+            }
+        })
+
+        const moderate = await moderation.create({
+            new_information: JSON.stringify({
+                type: "doctor-change-accesses",
+                id: doctor_id,
+                newInfo: { text: "Запрос смены доступов" }
+            })
+        })
+
+        await doc.addModeration(moderate)
+
+        const text = `
+            <h4>Администраторы уже получили информацию и проверяют ее, ожидайте.</h4>
+            <p>Номер вашей заявки: <b>#${moderate.moderation_id}</b></p>
+        `
+
+        sendEmail(
+            doc.email,
+            "Смена доступов (в работе)",
             text
         )
 

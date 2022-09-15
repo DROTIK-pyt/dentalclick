@@ -11,14 +11,18 @@ let transporter = nodemailer.createTransport({
 })
 
 async function sendEmail(to, subject = "Новое письмо DentalClik", text) {
-    const result = await transporter.sendMail({
-        from: `<${user}>`,
-        to: to,
-        subject: subject,
-        html: text,
-    })
+    try {
+        const result = await transporter.sendMail({
+            from: `<${user}>`,
+            to: to,
+            subject: subject,
+            html: text,
+        })
 
-    return result
+        return result
+    } catch(e) {
+        console.log(e.response)
+    }
 }
 
 module.exports = {

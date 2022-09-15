@@ -22,6 +22,7 @@
                 color="error"
                 small
                 class="mb-5"
+                @click="callChangeAccesses"
                 >
                 Запросить смену доступов
                 </v-btn>
@@ -89,11 +90,16 @@
                 v-model="add_notes"
                 ></v-textarea>
             </v-form>
+            <CompleteSended
+               :isSended="isSended" 
+            />
         </v-col>
     </div>
 </template>
 
 <script>
+import CompleteSended from '@/components/centers/CompleteSended'
+
 const baseSettings = require('../../server/config/serverSetting')
 const base64 = require('base-64')
 
@@ -104,6 +110,7 @@ export default {
         return {
             id: this.$store.getters['eduCenter/getId'],
             loading: false,
+            isSended: false,
             title: "",
             contact_person: "",
             phone: "",
@@ -112,6 +119,9 @@ export default {
             requisites: "",
             add_notes: ""
         }
+    },
+    components: {
+        CompleteSended
     },
     methods: {
         async sendToModerate() {
@@ -138,6 +148,25 @@ export default {
 
             setTimeout(() => {
                 this.loading = false
+                this.isSended = true
+            }, 500)
+        },
+        async callChangeAccesses() {
+            this.checkAuth()
+
+            const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/change-accesses`, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8'
+                },
+                body: JSON.stringify({
+                    educational_center_id: this.id,
+                })
+            })
+            const responsed = await result.json()
+
+            setTimeout(() => {
+                this.isSended = true
             }, 500)
         },
         async checkAuth() {

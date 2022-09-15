@@ -301,7 +301,7 @@ CREATE TABLE IF NOT EXISTS `moderations` (
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime NOT NULL,
   PRIMARY KEY (`moderation_id`)
-) ENGINE = InnoDB AUTO_INCREMENT = 59 DEFAULT CHARSET = utf8;
+) ENGINE = InnoDB AUTO_INCREMENT = 73 DEFAULT CHARSET = utf8;
 
 # ------------------------------------------------------------
 # SCHEMA DUMP FOR TABLE: moderec
@@ -796,6 +796,51 @@ INSERT INTO
   )
 VALUES
   ('2022-09-15 09:45:53', '2022-09-15 09:45:53', 1, 58);
+INSERT INTO
+  `doctormoder` (
+    `createdAt`,
+    `updatedAt`,
+    `doctorDoctorId`,
+    `moderationModerationId`
+  )
+VALUES
+  ('2022-09-15 13:45:25', '2022-09-15 13:45:25', 1, 59);
+INSERT INTO
+  `doctormoder` (
+    `createdAt`,
+    `updatedAt`,
+    `doctorDoctorId`,
+    `moderationModerationId`
+  )
+VALUES
+  ('2022-09-15 13:52:24', '2022-09-15 13:52:24', 1, 60);
+INSERT INTO
+  `doctormoder` (
+    `createdAt`,
+    `updatedAt`,
+    `doctorDoctorId`,
+    `moderationModerationId`
+  )
+VALUES
+  ('2022-09-15 13:52:46', '2022-09-15 13:52:46', 1, 61);
+INSERT INTO
+  `doctormoder` (
+    `createdAt`,
+    `updatedAt`,
+    `doctorDoctorId`,
+    `moderationModerationId`
+  )
+VALUES
+  ('2022-09-15 13:54:07', '2022-09-15 13:54:07', 1, 62);
+INSERT INTO
+  `doctormoder` (
+    `createdAt`,
+    `updatedAt`,
+    `doctorDoctorId`,
+    `moderationModerationId`
+  )
+VALUES
+  ('2022-09-15 13:54:26', '2022-09-15 13:54:26', 1, 63);
 
 # ------------------------------------------------------------
 # DATA DUMP FOR TABLE: doctors
@@ -822,10 +867,10 @@ VALUES
     'ivan.spiridonov.0100@mail.ru',
     '202cb962ac59075b964b07152d234b70',
     'Moscow',
-    'ba8add72-1375-44dc-b46a-49d94f0ad519',
+    '5ed5c2dc-0a20-42fb-bb7f-8c8d5cc23206',
     'Ортопедия',
     '2022-09-13 11:40:30',
-    '2022-09-15 09:51:44'
+    '2022-09-15 13:52:44'
   );
 
 # ------------------------------------------------------------
@@ -936,9 +981,9 @@ VALUES
     'url',
     'requisites',
     'requisites\r\nrequisites',
-    '6857eca1-3741-4aa1-aa48-2cb31b4b13a5',
+    '9a4bdc3e-fdb8-48c2-ac48-b891e238c983',
     '2022-07-17 23:11:06',
-    '2022-09-15 09:17:28'
+    '2022-09-15 14:08:14'
   );
 INSERT INTO
   `educational_centers` (
@@ -1073,6 +1118,188 @@ VALUES
     '2022-09-15 09:45:53',
     '2022-09-15 09:45:53'
   );
+INSERT INTO
+  `moderations` (
+    `moderation_id`,
+    `new_information`,
+    `createdAt`,
+    `updatedAt`
+  )
+VALUES
+  (
+    59,
+    '{\"type\":\"doctor-change-accesses\",\"id\":1,\"newInfo\":{\"text\":\"Запрос смены доступов\"}}',
+    '2022-09-15 13:45:25',
+    '2022-09-15 13:45:25'
+  );
+INSERT INTO
+  `moderations` (
+    `moderation_id`,
+    `new_information`,
+    `createdAt`,
+    `updatedAt`
+  )
+VALUES
+  (
+    60,
+    '{\"type\":\"doctor\",\"id\":1,\"newInfo\":{\"name\":\"test\",\"email\":\"ivan.spiridonov.0100@mail.ru\",\"phone\":\"234512341234234\",\"region\":\"Moscow\",\"specialization\":\"Ортопедия\"}}',
+    '2022-09-15 13:52:24',
+    '2022-09-15 13:52:24'
+  );
+INSERT INTO
+  `moderations` (
+    `moderation_id`,
+    `new_information`,
+    `createdAt`,
+    `updatedAt`
+  )
+VALUES
+  (
+    61,
+    '{\"type\":\"doctor-change-accesses\",\"id\":1,\"newInfo\":{\"text\":\"Запрос смены доступов\"}}',
+    '2022-09-15 13:52:46',
+    '2022-09-15 13:52:46'
+  );
+INSERT INTO
+  `moderations` (
+    `moderation_id`,
+    `new_information`,
+    `createdAt`,
+    `updatedAt`
+  )
+VALUES
+  (
+    62,
+    '{\"type\":\"doctor-change-accesses\",\"id\":1,\"newInfo\":{\"text\":\"Запрос смены доступов\"}}',
+    '2022-09-15 13:54:07',
+    '2022-09-15 13:54:07'
+  );
+INSERT INTO
+  `moderations` (
+    `moderation_id`,
+    `new_information`,
+    `createdAt`,
+    `updatedAt`
+  )
+VALUES
+  (
+    63,
+    '{\"type\":\"doctor-change-accesses\",\"id\":1,\"newInfo\":{\"text\":\"Запрос смены доступов\"}}',
+    '2022-09-15 13:54:26',
+    '2022-09-15 13:54:26'
+  );
+INSERT INTO
+  `moderations` (
+    `moderation_id`,
+    `new_information`,
+    `createdAt`,
+    `updatedAt`
+  )
+VALUES
+  (
+    64,
+    '{\"type\":\"eduCenter\",\"id\":1,\"newInfo\":{\"id\":1,\"title\":\"title1\",\"contact_person\":\"person\",\"phone\":\"289347982374\",\"email\":\"ex@mail.ru\",\"site_url\":\"url\",\"requisites\":\"requisites\",\"add_notes\":\"requisites\\r\\nrequisites\"}}',
+    '2022-09-15 13:57:48',
+    '2022-09-15 13:57:48'
+  );
+INSERT INTO
+  `moderations` (
+    `moderation_id`,
+    `new_information`,
+    `createdAt`,
+    `updatedAt`
+  )
+VALUES
+  (
+    65,
+    '{\"type\":\"eduCenter\",\"id\":1,\"newInfo\":{\"id\":1,\"title\":\"title1\",\"contact_person\":\"person\",\"phone\":\"289347982374\",\"email\":\"ex@mail.ru\",\"site_url\":\"url\",\"requisites\":\"requisites\",\"add_notes\":\"requisites\\r\\nrequisites\"}}',
+    '2022-09-15 14:04:34',
+    '2022-09-15 14:04:34'
+  );
+INSERT INTO
+  `moderations` (
+    `moderation_id`,
+    `new_information`,
+    `createdAt`,
+    `updatedAt`
+  )
+VALUES
+  (
+    66,
+    '{\"type\":\"eduCenter\",\"id\":1,\"newInfo\":{\"id\":1,\"title\":\"title1\",\"contact_person\":\"person\",\"phone\":\"289347982374\",\"email\":\"ex@mail.ru\",\"site_url\":\"url\",\"requisites\":\"requisites\",\"add_notes\":\"requisites\\r\\nrequisites\"}}',
+    '2022-09-15 14:05:45',
+    '2022-09-15 14:05:45'
+  );
+INSERT INTO
+  `moderations` (
+    `moderation_id`,
+    `new_information`,
+    `createdAt`,
+    `updatedAt`
+  )
+VALUES
+  (
+    67,
+    '{\"type\":\"eduCenter\",\"id\":1,\"newInfo\":{\"id\":1,\"title\":\"title1\",\"contact_person\":\"person\",\"phone\":\"289347982374\",\"email\":\"ex@mail.ru\",\"site_url\":\"url\",\"requisites\":\"requisites\",\"add_notes\":\"requisites\\r\\nrequisites\"}}',
+    '2022-09-15 14:06:10',
+    '2022-09-15 14:06:10'
+  );
+INSERT INTO
+  `moderations` (
+    `moderation_id`,
+    `new_information`,
+    `createdAt`,
+    `updatedAt`
+  )
+VALUES
+  (
+    68,
+    '{\"type\":\"eduCenter\",\"id\":1,\"newInfo\":{\"id\":1,\"title\":\"title1\",\"contact_person\":\"person\",\"phone\":\"289347982374\",\"email\":\"ex@mail.ru\",\"site_url\":\"url\",\"requisites\":\"requisites\",\"add_notes\":\"requisites\\r\\nrequisites\"}}',
+    '2022-09-15 14:07:35',
+    '2022-09-15 14:07:35'
+  );
+INSERT INTO
+  `moderations` (
+    `moderation_id`,
+    `new_information`,
+    `createdAt`,
+    `updatedAt`
+  )
+VALUES
+  (
+    69,
+    '{\"type\":\"eduCenter\",\"id\":1,\"newInfo\":{\"id\":1,\"title\":\"title1\",\"contact_person\":\"person\",\"phone\":\"289347982374\",\"email\":\"ex@mail.ru\",\"site_url\":\"url\",\"requisites\":\"requisites\",\"add_notes\":\"requisites\\r\\nrequisites\"}}',
+    '2022-09-15 14:08:14',
+    '2022-09-15 14:08:14'
+  );
+INSERT INTO
+  `moderations` (
+    `moderation_id`,
+    `new_information`,
+    `createdAt`,
+    `updatedAt`
+  )
+VALUES
+  (
+    70,
+    '{\"type\":\"edu-center-change-accesses\",\"id\":1,\"newInfo\":{\"text\":\"Запрос смены доступов\"}}',
+    '2022-09-15 14:10:22',
+    '2022-09-15 14:10:22'
+  );
+INSERT INTO
+  `moderations` (
+    `moderation_id`,
+    `new_information`,
+    `createdAt`,
+    `updatedAt`
+  )
+VALUES
+  (
+    72,
+    '{\"type\":\"register-new-doctor\",\"id\":-1,\"newInfo\":{\"name\":\"test\",\"phone\":\"2345234\",\"email\":\"ivan.spiridonov.0100@mail.ru\",\"password\":\"123\",\"region\":\"KRD\",\"specialization\":\"Студент\",\"refresh_token\":null}}',
+    '2022-09-15 14:40:09',
+    '2022-09-15 14:40:09'
+  );
 
 # ------------------------------------------------------------
 # DATA DUMP FOR TABLE: moderec
@@ -1105,6 +1332,69 @@ INSERT INTO
   )
 VALUES
   ('2022-09-15 09:20:00', '2022-09-15 09:20:00', 55, 1);
+INSERT INTO
+  `moderec` (
+    `createdAt`,
+    `updatedAt`,
+    `moderationModerationId`,
+    `educationalCenterEducationalCenterId`
+  )
+VALUES
+  ('2022-09-15 13:57:48', '2022-09-15 13:57:48', 64, 1);
+INSERT INTO
+  `moderec` (
+    `createdAt`,
+    `updatedAt`,
+    `moderationModerationId`,
+    `educationalCenterEducationalCenterId`
+  )
+VALUES
+  ('2022-09-15 14:04:34', '2022-09-15 14:04:34', 65, 1);
+INSERT INTO
+  `moderec` (
+    `createdAt`,
+    `updatedAt`,
+    `moderationModerationId`,
+    `educationalCenterEducationalCenterId`
+  )
+VALUES
+  ('2022-09-15 14:05:46', '2022-09-15 14:05:46', 66, 1);
+INSERT INTO
+  `moderec` (
+    `createdAt`,
+    `updatedAt`,
+    `moderationModerationId`,
+    `educationalCenterEducationalCenterId`
+  )
+VALUES
+  ('2022-09-15 14:06:10', '2022-09-15 14:06:10', 67, 1);
+INSERT INTO
+  `moderec` (
+    `createdAt`,
+    `updatedAt`,
+    `moderationModerationId`,
+    `educationalCenterEducationalCenterId`
+  )
+VALUES
+  ('2022-09-15 14:07:35', '2022-09-15 14:07:35', 68, 1);
+INSERT INTO
+  `moderec` (
+    `createdAt`,
+    `updatedAt`,
+    `moderationModerationId`,
+    `educationalCenterEducationalCenterId`
+  )
+VALUES
+  ('2022-09-15 14:08:14', '2022-09-15 14:08:14', 69, 1);
+INSERT INTO
+  `moderec` (
+    `createdAt`,
+    `updatedAt`,
+    `moderationModerationId`,
+    `educationalCenterEducationalCenterId`
+  )
+VALUES
+  ('2022-09-15 14:10:22', '2022-09-15 14:10:22', 70, 1);
 
 # ------------------------------------------------------------
 # DATA DUMP FOR TABLE: rubrics

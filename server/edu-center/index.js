@@ -523,7 +523,7 @@ module.exports = function(app, upload) {
 
         const text = `
             <h4>Администраторы уже получили информацию и проверяют ее, ожидайте.</h4>
-            <p>Номер вашей заявки: <b>#${moderate.moderation_id}</b></p>
+            <p>Номер вашей заявки: <b>#${newModerate.moderation_id}</b></p>
         `
 
         sendEmail(
@@ -578,6 +578,17 @@ module.exports = function(app, upload) {
                 }
             })
 
+            const text = `
+                <h4>Кто-то авторизовался в вашем аккаунте.</h4>
+                <p>Если это были не вы, то как можно скорее свяжитесь с нами.</p>
+            `
+
+            sendEmail(
+                ec.email,
+                "Авторизация в аккаунте",
+                text
+            )
+
             res.json({ok: true, educational_center_id: ec.educational_center_id, tokens: {refresh, access}})
 
         } else {
@@ -606,6 +617,40 @@ module.exports = function(app, upload) {
             })
 
             res.json({ok: true, eduCenter: ec, tokens: {refresh, access}})
+        } else {
+            res.json({ok: false})
+        }
+    })
+
+    app.post('/edu-center/change-accesses', async (req, res) => {
+
+        const ec = await educationalCenter.findOne({
+            where: {
+                educational_center_id: req.body.educational_center_id,
+            }
+        })
+        const moderate = await moderation.create({
+            new_information: JSON.stringify({
+                type: "edu-center-change-accesses",
+                id: req.body.educational_center_id,
+                newInfo: { text: "Запрос смены доступов" }
+            })
+        })
+        if(ec) {
+            await ec.addModeration(moderate)
+
+            const text = `
+                <h4>Администраторы уже получили информацию и проверяют ее, ожидайте.</h4>
+                <p>Номер вашей заявки: <b>#${moderate.moderation_id}</b></p>
+            `
+
+            sendEmail(
+                ec.email,
+                "Смена доступов (в работе)",
+                text
+            )
+
+            res.json({ok: true})
         } else {
             res.json({ok: false})
         }

@@ -6,12 +6,21 @@
         >
         <v-btn
         class="ma-2"
-        :loading="loading"
-        :disabled="loading"
+        :loading="loadingProfile"
+        :disabled="loadingProfile"
         color="success"
         @click="saveProfile"
         >
         Отправить на модерацию
+        </v-btn>
+        <v-btn
+        class="ma-2"
+        :loading="loadingAccesses"
+        :disabled="loadingAccesses"
+        color="error"
+        @click="changeAccesses"
+        >
+        Запросить смену доступов
         </v-btn>
         <v-textarea
             label="ФИО"
@@ -48,11 +57,16 @@
             row-height="30"
             v-model="specialization"
         ></v-textarea>
+        <CompleteSended
+            :isSended="isSended"
+        />
         </v-col>
     </v-row>
 </template>
 
 <script>
+import CompleteSended from '@/components/doctors/CompleteSended'
+
 const baseSettings = require('../../server/config/serverSetting')
 const base64 = require('base-64')
 
@@ -60,12 +74,14 @@ export default {
     layout: "ProfileDoc",
 
     components: {
-
+        CompleteSended
     },
     data() {
         return {
             id: this.$store.getters['doctors/getId'],
-            loading: false,
+            loadingAccesses: false,
+            loadingProfile: false,
+            isSended: false,
             name: "",
             phone: "",
             email: "",
@@ -126,7 +142,7 @@ export default {
             this.specialization = responsed.info.specialization
         },
         async saveProfile() {
-            this.loading = true
+            this.loadingProfile = true
 
             const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/doctor/moderate`, {
                 method: "PUT",
@@ -146,7 +162,27 @@ export default {
             
             const responsed = await result.json()
             setTimeout(() => {
-                this.loading = false
+                this.loadingProfile = false
+                this.isSended = true
+            }, 500)
+        },
+        async changeAccesses() {
+            this.loadingAccesses = true
+
+            await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/doctor/change-accesses`, {
+                method: "PUT",
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8',
+                    'Authorization': 'Bearer ' + this.$store.getters['doctors/getTokens'].access
+                },
+                body: JSON.stringify({
+                    doctor_id: this.id,
+                })
+            })
+
+            setTimeout(() => {
+                this.loadingAccesses = false
+                this.isSended = true
             }, 500)
         },
     },
