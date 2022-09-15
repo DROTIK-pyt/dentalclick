@@ -1,12 +1,13 @@
 <template>
     <v-row>
-        <v-col cols="12" sm="9">
+        <v-col cols="12" sm="12" xl="9">
         <v-select
           v-model="currentEduCenters"
           :items="eduCentersItems"
           :menu-props="{ maxHeight: '400' }"
           label="Выберите образовательные центры"
           multiple
+          chips
           persistent-hint
         ></v-select>
         <TableCurses

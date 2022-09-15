@@ -10,6 +10,8 @@
                 depressed
                 color="primary"
                 class="mb-2"
+                :loading="loading"
+                :disabled="loading"
                 @click="sendToModerate"
                 >
                 Отправить на модерацию
@@ -101,6 +103,7 @@ export default {
     data() {
         return {
             id: this.$store.getters['eduCenter/getId'],
+            loading: false,
             title: "",
             contact_person: "",
             phone: "",
@@ -113,6 +116,7 @@ export default {
     methods: {
         async sendToModerate() {
             this.checkAuth()
+            this.loading = true
 
             const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu/moderate`, {
                 method: "POST",
@@ -131,6 +135,10 @@ export default {
                 })
             })
             const responsed = await result.json()
+
+            setTimeout(() => {
+                this.loading = false
+            }, 500)
         },
         async checkAuth() {
             if(this.$store.getters['eduCenter/getTokens'].refresh) {

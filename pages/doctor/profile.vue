@@ -2,9 +2,52 @@
     <v-row>
         <v-col
         cols="12"
-        sm4
+        sm="9"
         >
-        <h1>profile page</h1>
+        <v-btn
+        class="ma-2"
+        :loading="loading"
+        :disabled="loading"
+        color="success"
+        @click="saveProfile"
+        >
+        Отправить на модерацию
+        </v-btn>
+        <v-textarea
+            label="ФИО"
+            auto-grow
+            rows="1"
+            row-height="15"
+            v-model="name"
+        ></v-textarea>
+        <v-textarea
+            label="Телефон"
+            auto-grow
+            rows="1"
+            row-height="15"
+            v-model="phone"
+        ></v-textarea>
+        <v-textarea
+            label="E-mail"
+            auto-grow
+            rows="1"
+            row-height="15"
+            v-model="email"
+        ></v-textarea>
+        <v-textarea
+            label="Регион"
+            auto-grow
+            rows="1"
+            row-height="22"
+            v-model="region"
+        ></v-textarea>
+        <v-textarea
+            label="Специализация(и)"
+            auto-grow
+            rows="1"
+            row-height="30"
+            v-model="specialization"
+        ></v-textarea>
         </v-col>
     </v-row>
 </template>
@@ -22,6 +65,7 @@ export default {
     data() {
         return {
             id: this.$store.getters['doctors/getId'],
+            loading: false,
             name: "",
             phone: "",
             email: "",
@@ -80,7 +124,31 @@ export default {
             this.email = responsed.info.email
             this.region = responsed.info.region
             this.specialization = responsed.info.specialization
-        }
+        },
+        async saveProfile() {
+            this.loading = true
+
+            const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/doctor/moderate`, {
+                method: "PUT",
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8',
+                    'Authorization': 'Bearer ' + this.$store.getters['doctors/getTokens'].access
+                },
+                body: JSON.stringify({
+                    doctor_id: this.id,
+                    name: this.name,
+                    phone: this.phone,
+                    email: this.email,
+                    region: this.region,
+                    specialization: this.specialization,
+                })
+            })
+            
+            const responsed = await result.json()
+            setTimeout(() => {
+                this.loading = false
+            }, 500)
+        },
     },
     beforeMount() {
         this.getAllData()

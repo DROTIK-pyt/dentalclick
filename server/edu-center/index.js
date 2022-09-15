@@ -6,7 +6,7 @@ module.exports = function(app, upload) {
     const { v4: uuidv4 } = require('uuid')
     const jwt = require('jsonwebtoken')
     const base64 = require('base-64')
-    // не articles.create({}), educationalCenter.addArticle()
+    const { sendEmail } = require('../sendMail') // Отправка сообщений на почту
 
     app.post('/edu-center/blog', async (req, res) => {
         const educational_center_id = req.body.educational_center_id
@@ -513,9 +513,24 @@ module.exports = function(app, upload) {
         const data = req.body
         const center = await educationalCenter.findOne({where: {educational_center_id: data.id}})
         const newModerate = await moderation.create({
-            new_information: JSON.stringify(data)
+            new_information: JSON.stringify({
+                type: "eduCenter",
+                id: data.id,
+                newInfo: data
+            })
         })
         await center.addModeration(newModerate)
+
+        const text = `
+            <h4>Администраторы уже получили информацию и проверяют ее, ожидайте.</h4>
+            <p>Номер вашей заявки: <b>#${moderate.moderation_id}</b></p>
+        `
+
+        sendEmail(
+            center.email,
+            "Изменение профиля (в работе)",
+            text
+        )
 
         res.json({ok: true})
     })

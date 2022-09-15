@@ -6,6 +6,7 @@ module.exports = function(app, upload) {
     const { v4: uuidv4 } = require('uuid')
     const jwt = require('jsonwebtoken')
     const base64 = require('base-64')
+    const { sendEmail } = require('../sendMail') // Отправка сообщений на почту
 
     app.post('/doctor/info', async (req, res) => {
         const doc = await doctor.findOne({
@@ -217,5 +218,39 @@ module.exports = function(app, upload) {
         } else {
             res.json({ok: true, curses: []})
         }
+    })
+
+    app.put('/doctor/moderate', async (req, res) => {
+
+        const { doctor_id, name, email, phone, region, specialization } = req.body
+
+        const doc = await doctor.findOne({
+            where: {
+                doctor_id
+            }
+        })
+
+        const moderate = await moderation.create({
+            new_information: JSON.stringify({
+                type: "doctor",
+                id: doctor_id,
+                newInfo: { name, email, phone, region, specialization }
+            })
+        })
+
+        await doc.addModeration(moderate)
+
+        const text = `
+            <h4>Администраторы уже получили информацию и проверяют ее, ожидайте.</h4>
+            <p>Номер вашей заявки: <b>#${moderate.moderation_id}</b></p>
+        `
+
+        sendEmail(
+            doc.email,
+            "Изменение профиля (в работе)",
+            text
+        )
+
+        res.json({ok: true})
     })
 }
