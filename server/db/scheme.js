@@ -221,7 +221,7 @@ educationalCenter.belongsToMany(category, {through: "ECCategory"})
 category.belongsToMany(educationalCenter, {through: "ECCategory"})
 
 const status = sequelize.define('status', {
-    curse_status_id: {
+    status_id: {
         type: DataTypes.INTEGER,
         autoIncrement: true,
         primaryKey: true,

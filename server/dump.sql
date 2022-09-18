@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS `access_rights` (
   `access_rights_id` int(11) NOT NULL AUTO_INCREMENT,
   `type` varchar(255) NOT NULL,
   PRIMARY KEY (`access_rights_id`)
-) ENGINE = InnoDB AUTO_INCREMENT = 7 DEFAULT CHARSET = utf8;
+) ENGINE = InnoDB AUTO_INCREMENT = 18 DEFAULT CHARSET = utf8;
 
 # ------------------------------------------------------------
 # SCHEMA DUMP FOR TABLE: accessrightsec
@@ -130,7 +130,7 @@ CREATE TABLE IF NOT EXISTS `cursecursestatus` (
   PRIMARY KEY (`curseCurseId`, `statusCurseStatusId`),
   KEY `statusCurseStatusId` (`statusCurseStatusId`),
   CONSTRAINT `cursecursestatus_ibfk_1` FOREIGN KEY (`curseCurseId`) REFERENCES `curses` (`curse_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `cursecursestatus_ibfk_2` FOREIGN KEY (`statusCurseStatusId`) REFERENCES `statuses` (`curse_status_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `cursecursestatus_ibfk_2` FOREIGN KEY (`statusCurseStatusId`) REFERENCES `statuses` (`status_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8;
 
 # ------------------------------------------------------------
@@ -336,9 +336,9 @@ CREATE TABLE IF NOT EXISTS `rubrics` (
 # ------------------------------------------------------------
 
 CREATE TABLE IF NOT EXISTS `statuses` (
-  `curse_status_id` int(11) NOT NULL AUTO_INCREMENT,
+  `status_id` int(11) NOT NULL AUTO_INCREMENT,
   `title` varchar(255) NOT NULL,
-  PRIMARY KEY (`curse_status_id`)
+  PRIMARY KEY (`status_id`)
 ) ENGINE = InnoDB AUTO_INCREMENT = 3 DEFAULT CHARSET = utf8;
 
 # ------------------------------------------------------------
@@ -369,6 +369,50 @@ INSERT INTO
   `access_rights` (`access_rights_id`, `type`)
 VALUES
   (6, 'doc_access_subscribe');
+INSERT INTO
+  `access_rights` (`access_rights_id`, `type`)
+VALUES
+  (7, 'admin_add_center');
+INSERT INTO
+  `access_rights` (`access_rights_id`, `type`)
+VALUES
+  (8, 'admin_edit_center');
+INSERT INTO
+  `access_rights` (`access_rights_id`, `type`)
+VALUES
+  (9, 'admin_remove_center');
+INSERT INTO
+  `access_rights` (`access_rights_id`, `type`)
+VALUES
+  (10, 'admin_moderate_center');
+INSERT INTO
+  `access_rights` (`access_rights_id`, `type`)
+VALUES
+  (11, 'admin_add_doctor');
+INSERT INTO
+  `access_rights` (`access_rights_id`, `type`)
+VALUES
+  (12, 'admin_edit_doctor');
+INSERT INTO
+  `access_rights` (`access_rights_id`, `type`)
+VALUES
+  (13, 'admin_remove_doctor');
+INSERT INTO
+  `access_rights` (`access_rights_id`, `type`)
+VALUES
+  (14, 'admin_moderate_doctor');
+INSERT INTO
+  `access_rights` (`access_rights_id`, `type`)
+VALUES
+  (15, 'admin_add_curse');
+INSERT INTO
+  `access_rights` (`access_rights_id`, `type`)
+VALUES
+  (16, 'admin_edit_curse');
+INSERT INTO
+  `access_rights` (`access_rights_id`, `type`)
+VALUES
+  (17, 'admin_remove_curse');
 
 # ------------------------------------------------------------
 # DATA DUMP FOR TABLE: accessrightsec
@@ -867,10 +911,10 @@ VALUES
     'ivan.spiridonov.0100@mail.ru',
     '202cb962ac59075b964b07152d234b70',
     'Moscow',
-    '5ed5c2dc-0a20-42fb-bb7f-8c8d5cc23206',
+    '7da4af9f-978c-4f73-a14e-745d63785ba3',
     'Ортопедия',
     '2022-09-13 11:40:30',
-    '2022-09-15 13:52:44'
+    '2022-09-18 09:49:15'
   );
 
 # ------------------------------------------------------------
@@ -1410,11 +1454,11 @@ VALUES
 # ------------------------------------------------------------
 
 INSERT INTO
-  `statuses` (`curse_status_id`, `title`)
+  `statuses` (`status_id`, `title`)
 VALUES
   (1, 'public');
 INSERT INTO
-  `statuses` (`curse_status_id`, `title`)
+  `statuses` (`status_id`, `title`)
 VALUES
   (2, 'trashed');
 

@@ -19,16 +19,11 @@
 
                 <v-text-field
                 v-model="password"
+                type="password"
                 label="Пароль"
                 required
                 ></v-text-field>
-                <v-btn
-                text
-                color="error"
-                class="text-caption text-right"
-                >
-                    Нужна помощь?
-                </v-btn>
+                <p class="pa-2 white--text red" v-for="error in errors" :key="error">{{ error }}</p>
                 <v-btn
                 color="primary"
                 elevation="2"
@@ -77,9 +72,7 @@ export default {
     beforeMount() {
         this.$store.commit('eduCenter/syncState')
         if (this.$store.getters['eduCenter/getIsAuth']) {
-            setTimeout(() => {
-                this.$router.push({path: `/edu-center/profile`})
-            }, 300)
+            this.$router.push({path: `/edu-center/profile`})
         }
     },
     beforeDestroy() {

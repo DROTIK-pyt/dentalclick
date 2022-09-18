@@ -23,12 +23,12 @@
                 label="Пароль"
                 required
                 ></v-text-field>
-                <p class="pa-2 white--text red" v-for="error in errors" :key="error">{{ error }}</p>
+                <p class="pa-2 white--text red" v-for="(error, i) in errors" :key="i">{{ error }}</p>
                 <v-btn
                 color="primary"
                 elevation="2"
                 large
-                @click.prevent="loginDoc"
+                @click.prevent="loginSuperUser"
                 >Войти</v-btn>
             </v-form>
         </v-col>
@@ -39,6 +39,7 @@
 const baseSettings = require('../../server/config/serverSetting')
 
 export default {
+    components: {},
     data() {
         return {
             login: "",
@@ -47,8 +48,8 @@ export default {
         }
     },
     methods: {
-        async loginDoc() {
-            const response = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/doctor/login`, {
+        async loginSuperUser() {
+            const response = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/super-user/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json;charset=utf-8',
@@ -58,25 +59,30 @@ export default {
                     password: this.password
                 })
             })
-
-            const data = await response.json()
-            if (data.ok) {
-                this.$store.commit('doctors/authenticate', {doctor_id: data.doctor_id, tokens: data.tokens})
-                this.$router.push({path: `/doctor/profile`})
+            const result = await response.json()
+            if(result.ok) {
+                this.$store.commit('superuser/authenticate', {tokens: result.tokens})
+                this.$router.push({path: `/dentalclik-dashboard/profile`})
             } else {
-                this.errors.push("Введены неккоректные данные")
+                this.errors.push(result.error.msg)
             }
+        },
+    },
+    watch: {
+        errors() {
+            setTimeout(() => {
+                this.errors = []
+            }, 4000)
         }
     },
-    components: {},
     beforeMount() {
-        this.$store.commit('doctors/syncState')
-        if (this.$store.getters['doctors/getIsAuth']) {
-            this.$router.push({path: `/doctor/profile`})
+        this.$store.commit('superuser/syncState')
+        if (this.$store.getters['superuser/getIsAuth']) {
+            this.$router.push({path: `/dentalclik-dashboard/profile`})
         }
     },
     beforeDestroy() {
-        this.$store.commit('doctors/saveState')
+        this.$store.commit('superuser/saveState')
     }
 }
 </script>

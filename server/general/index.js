@@ -1,5 +1,8 @@
 module.exports = function(app, upload) {
+    const fs = require('fs')
+
     const dbBaseSetting = require('../config/dbBaseSetting')
+    const { accessRight, Op } = require('../db/scheme')
 
     app.get('/dumb-db', async (req, res) => {
         var mysqldump = require('mysqldump')
@@ -38,5 +41,20 @@ module.exports = function(app, upload) {
         }).catch(err=>{
             console.error(err)
         })
+    })
+
+    app.get('/write-access', async (req, res) => {
+        const rights = await accessRight.findAll({ raw: true, attributes: [ 'type' ] })
+        const result = {}
+        rights.forEach(right => {
+            result[`${right.type}`] = right.type
+        })
+        
+        try {
+            fs.writeFileSync("./config/userAccessRights.json", JSON.stringify(result))
+            res.json({ok: true, error: null})
+        } catch(e) {
+            res.json({ok: false, error: e})
+        }
     })
 }
