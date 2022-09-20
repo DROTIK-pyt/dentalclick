@@ -11,7 +11,7 @@
                     ></v-img>
                 </nuxt-link>
             </v-col>
-            <v-col class="right d-flex justify-space-between align-center" cols="12" sm="9" lg="5" offset-lg="4" tag="ul">
+            <v-col class="right d-flex justify-space-between align-center" cols="12" sm="8" offset-sm="1" tag="ul">
                 <nuxt-link class="header-link text-h6" :to="toUrl('admins')">Админы</nuxt-link>
                 <nuxt-link class="header-link text-h6" :to="toUrl('centers')">Обр. центры</nuxt-link>
                 <nuxt-link class="header-link text-h6" :to="toUrl('curses')">Курсы</nuxt-link>

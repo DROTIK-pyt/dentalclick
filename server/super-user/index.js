@@ -32,7 +32,7 @@ module.exports = function(app, upload) {
     })
 
     app.post('/super-user/refresh', async (req, res) => {
-        const { refresh, login } = req.body
+        const { refresh } = req.body
         dataUser = require('./dataUser')
        
         if(refresh === dataUser?.refresh) {
