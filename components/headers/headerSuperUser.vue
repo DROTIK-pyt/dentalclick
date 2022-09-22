@@ -2,7 +2,7 @@
     <header class="d-flex align-center pb-10">
         <v-row>
             <v-col class="left" cols="12" sm="3">
-                <nuxt-link to="dentalclik-dashboard">
+                <nuxt-link to="/dentalclik-dashboard">
                     <v-img
                     :src="require('~/assets/images/dentalclick.png')"
                     width="190"
@@ -32,6 +32,8 @@
 </template>
 
 <script>
+const baseSettings = require('../../server/config/serverSetting')
+
 export default {
     name: "headerSuperUser",
     data() {
@@ -45,6 +47,7 @@ export default {
         },
         async superUserLogout() {
             this.$store.commit('superuser/logout')
+            await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/super-user/logout`)
             this.$store.commit('superuser/saveState')
             this.$router.push({path: "/dentalclik-dashboard/login"})
         },

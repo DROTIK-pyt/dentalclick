@@ -122,6 +122,20 @@ export default {
                 const refresh = this.$store.getters['eduCenter/getTokens'].refresh
                 const payload = JSON.parse(base64.decode(this.$store.getters['eduCenter/getTokens'].access.split('.')[1]))
 
+                const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu/status`, {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json;charset=utf-8',
+                    },
+                    body: JSON.stringify({
+                        educational_center_id: this.$store.getters['eduCenter/getId'],
+                    })
+                })
+                const responsed = await result.json()
+                if(responsed.status === "blocked") {
+                    this.$router.push({path: "/edu-center/was-blocked"})
+                }
+
                 if(Math.ceil(Date.now()/1000) >= +payload.exp - 8000) {
                     const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/refresh`, {
                         method: "POST",

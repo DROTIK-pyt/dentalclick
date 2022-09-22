@@ -214,6 +214,10 @@ export default {
             
             const responsed = await result.json()
 
+            if(responsed.status === "blocked") {
+                this.$router.push({path: "/edu-center/was-blocked"})
+            }
+
             this.title = responsed.info.title
             this.contact_person = responsed.info.contact_person
             this.phone = responsed.info.phone
@@ -227,6 +231,9 @@ export default {
         this.getAllData()
 
         this.$store.commit('eduCenter/syncState')
+        if (!this.$store.getters['eduCenter/getIsAuth']) {
+            this.$router.push({path: `/edu-center/login`})
+        }
     },
     beforeDestroy() {
         this.$store.commit('eduCenter/saveState')

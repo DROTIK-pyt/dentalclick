@@ -134,6 +134,10 @@ export default {
             })
             
             const responsed = await result.json()
+
+            if(responsed.status === "blocked") {
+                this.$router.push({path: "/doctor/was-blocked"})
+            }
             
             this.name = responsed.info.name
             this.phone = responsed.info.phone

@@ -115,6 +115,20 @@ export default {
                 const refresh = this.$store.getters['doctors/getTokens'].refresh
                 const payload = JSON.parse(base64.decode(this.$store.getters['doctors/getTokens'].access.split('.')[1]))
 
+                const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/doctor/status`, {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json;charset=utf-8',
+                    },
+                    body: JSON.stringify({
+                        doctor_id: this.$store.getters['doctors/getId'],
+                    })
+                })
+                const responsed = await result.json()
+                if(responsed.status === "blocked") {
+                    this.$router.push({path: "/doctor/was-blocked"})
+                }
+
                 if(Math.ceil(Date.now()/1000) >= +payload.exp - 8) {
                     const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/doctor/refresh`, {
                         method: "POST",

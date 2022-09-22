@@ -14,7 +14,20 @@ module.exports = function(app, upload) {
                 doctor_id: req.body.doctor_id
             }
         })
-        res.json({info: doc})
+
+        const docStatus = await doc.getStatuses()
+        res.json({info: doc, status: docStatus[0]?.title})
+    })
+
+    app.post('/doctor/status', async (req, res) => {
+        const doc = await doctor.findOne({
+            where: {
+                doctor_id: req.body.doctor_id
+            }
+        })
+
+        const docStatus = await doc.getStatuses()
+        res.json({status: docStatus[0]?.title})
     })
 
     app.post('/doctor/login', async (req, res) => {

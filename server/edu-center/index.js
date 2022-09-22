@@ -541,8 +541,20 @@ module.exports = function(app, upload) {
                 educational_center_id: req.body.educational_center_id
             }
         })
+        const status = await ec.getStatuses()
 
-        res.json({info: ec})
+        res.json({info: ec, status: status[0]?.title})
+    })
+
+    app.post('/edu/status', async (req, res) => {
+        const ec = await educationalCenter.findOne({
+            where: {
+                educational_center_id: req.body.educational_center_id
+            }
+        })
+        const status = await ec.getStatuses()
+
+        res.json({status: status[0]?.title})
     })
 
     app.post('/edu-center/accesses', async (req, res) => {

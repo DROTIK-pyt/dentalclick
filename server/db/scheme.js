@@ -235,6 +235,12 @@ const status = sequelize.define('status', {
 curse.belongsToMany(status, {through: "curseCurseStatus"})
 status.belongsToMany(curse, {through: "curseCurseStatus"})
 
+educationalCenter.belongsToMany(status, {through: "ecStatus"})
+status.belongsToMany(educationalCenter, {through: "ecStatus"})
+
+doctor.belongsToMany(status, {through: "docStatus"})
+status.belongsToMany(doctor, {through: "docStatus"})
+
 const moderation = sequelize.define('moderation', {
     moderation_id: {
         type: DataTypes.INTEGER,
