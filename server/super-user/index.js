@@ -5,6 +5,8 @@ module.exports = function(app, upload) {
     const jwt = require('jsonwebtoken')
     const base64 = require('base-64')
     const fs = require('fs')
+    const md5 = require('md5')
+    const { sendEmail } = require('../sendMail') // Отправка сообщений на почту
     let dataUser = require('./dataUser')
 
     app.get('/super-user/centers', async (req, res) => {
@@ -15,6 +17,59 @@ module.exports = function(app, upload) {
         res.json({ok: true, centers: ec})
     })
 
+    app.delete('/super-user/center', async (req, res) => {
+        const { educational_center_id } = req.body
+ 
+        await educationalCenter.destroy({
+            where: {
+                educational_center_id
+            }
+        })
+
+        res.json({ok: true})
+    })
+
+    app.post('/super-user/stop-center', async (req, res) => {
+        const { educational_center_id } = req.body
+
+        const ec = await educationalCenter.findOne({
+            where: {
+                educational_center_id,
+            }
+        })
+        const ecStatus = await ec.getStatuses()
+        let s
+
+        if(ecStatus[0]?.title === "public") {
+            ec.setStatuses(null)
+            s = await status.findOne({
+                where: {
+                    title: "blocked"
+                }
+            })
+            await ec.addStatus(s)
+        }
+        if(ecStatus[0]?.title === "blocked") {
+            ec.setStatuses(null)
+            s = await status.findOne({
+                where: {
+                    title: "public"
+                }
+            })
+            await ec.addStatus(s)
+        } else {
+            ec.setStatuses(null)
+            s = await status.findOne({
+                where: {
+                    title: "blocked"
+                }
+            })
+            await ec.addStatus(s)
+        }
+
+        res.json({ok: true, status: s[0]?.title || "public"})
+    })
+
     app.post('/super-user/get-center', async (req, res) => {
         const { educational_center_id } = req.body
 
@@ -23,8 +78,100 @@ module.exports = function(app, upload) {
                 educational_center_id
             }
         })
+        const status = await ec.getStatuses()
 
-        res.json({ok: true, center: ec})
+        res.json({ok: true, center: ec, status: status[0]?.title || 'public'})
+    })
+
+    app.post('/super-user/add-center', async (req, res) => {
+        const { center } = req.body
+
+        if(center.title &&
+           center.contact_person &&
+           center.phone &&
+           center.email &&
+           center.password) {
+            const ec = await educationalCenter.create({
+                title: center.title,
+                contact_person: center.contact_person,
+                phone: center.phone,
+                email: center.email,
+                password: md5(center.password),
+                site_url: center.site_url || "",
+                requisites: center.requisites || "",
+                add_notes: center.add_notes || "",
+                refresh_token: uuidv4(),
+            })
+            const s = await status.findOne({
+                where: {
+                    title: "public"
+                }
+            })
+            await ec.addStatus(s)
+
+            res.json({ok: true})
+        } else {
+            res.json({ok: false})
+        }
+    })
+
+    app.post('/super-user/save-center', async (req, res) => {
+        const { center } = req.body
+
+        if(center.password) {
+            await educationalCenter.update({
+                title: center.title,
+                contact_person: center.contact_person,
+                phone: center.phone,
+                email: center.email,
+                password: md5(center.password),
+                site_url: center.site_url,
+                requisites: center.requisites,
+                add_notes: center.add_notes,
+            }, {
+                where: {
+                    educational_center_id: center.educational_center_id
+                }
+            })
+
+            const text = `
+                <p>Информация была изменена.</p>
+                <p>Данные о вашем центре изменены.</p>
+                <p>Ваш новый пароль: ${center.password}</p>
+                <p>Ваш логин: ${center.email}</p>
+            `
+            sendEmail(
+                center.email,
+                "Изменение данных",
+                text
+            )
+        } else {
+            await educationalCenter.update({
+                title: center.title,
+                contact_person: center.contact_person,
+                phone: center.phone,
+                email: center.email,
+                site_url: center.site_url,
+                requisites: center.requisites,
+                add_notes: center.add_notes,
+            }, {
+                where: {
+                    educational_center_id: center.educational_center_id
+                }
+            })
+
+            const text = `
+                <p>Информация была изменена.</p>
+                <p>Данные о вашем центре изменены.</p>
+            `
+            sendEmail(
+                center.email,
+                "Изменение данных",
+                text
+            )
+        }
+
+        res.json({ok: true})
     })
 
     app.post('/super-user/login', async (req, res) => {

@@ -16,6 +16,7 @@
                 <nuxt-link class="header-link text-h6" :to="toUrl('centers')">Обр. центры</nuxt-link>
                 <nuxt-link class="header-link text-h6" :to="toUrl('curses')">Курсы</nuxt-link>
                 <nuxt-link class="header-link text-h6" :to="toUrl('doctors')">Докторы</nuxt-link>
+                <nuxt-link class="header-link text-h6" :to="toUrl('moderation')">Модерация</nuxt-link>
                 <v-btn
                 tile
                 color="error"
