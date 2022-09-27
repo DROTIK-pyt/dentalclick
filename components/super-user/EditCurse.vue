@@ -24,7 +24,7 @@
                 <v-btn
                 dark
                 text
-                @click="saveCurse"
+                
                 >
                 Сохранить изменения
                 </v-btn>
@@ -230,7 +230,10 @@ export default {
         }
     },
     async beforeMount() {
-        this.editCurseItem = this.curse
+        this.editCurseItem = this.curse || {}
+        if(this.editCurseItem) {
+            return
+        }
 
         const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/super-user/curse-categories`, {
             method: "POST",

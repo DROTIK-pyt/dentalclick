@@ -16,7 +16,7 @@
                 :isShow="isEditCurse"
                 :curse="editCurse"
                 @close="isEditCurse = false"
-                @saveCurseItem="saveCurse"
+                @saveCurseItem="isShowASkEdit = true"
             />
             <AskChanges
                 :title="askTitle"
@@ -129,7 +129,9 @@ export default {
                 }
             }
         },
-        async getAllData() {},
+        async getAllData() {
+            
+        },
         toEditCurse(curse) {
             this.askTitle = "Применить изменения?"
             this.askText = "Изменения вступят в силу незамедлительно."
