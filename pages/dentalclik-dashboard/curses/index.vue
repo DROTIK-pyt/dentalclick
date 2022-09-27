@@ -1,18 +1,106 @@
 <template>
     <v-row>
-
+        <v-col
+        cols="12"
+        sm="12"
+        lg="9"
+        >
+            <TableVue
+                :headers="headerCurse"
+                :items="curses"
+                title="Курсы"
+                @editItem="toEditCurse"
+            />
+            <EditCurse
+                :titleCurse="curseTitle"
+                :isShow="isEditCurse"
+                :curse="editCurse"
+                @close="isEditCurse = false"
+                @saveCurseItem="saveCurse"
+            />
+            <AskChanges
+                :title="askTitle"
+                :text="askText"
+                :isShow="isShowASkEdit"
+                @yes="saveEditCurse"
+                @no="isEditCurse = false"
+            />
+        </v-col>
     </v-row>
 </template>
 
 <script>
+import TableVue from '@/components/generals/TableVue'
+import AskChanges from '@/components/generals/AskChanges'
+import EditCurse from '@/components/super-user/EditCurse'
+
 export default {
     layout: "ProfileSuperUser",
     data() {
         return {
-            
+            headerCurse: [
+            {
+                    text: 'Название',
+                    align: 'start',
+                    sortable: false,
+                    value: 'title',
+                },
+                {
+                    text: 'Обр. центр',
+                    align: 'start',
+                    sortable: false,
+                    value: 'eduCenter',
+                },
+                {
+                    text: 'Лектор(ы)',
+                    align: 'start',
+                    sortable: false,
+                    value: 'lector',
+                },
+                {
+                    text: 'Дата начала',
+                    align: 'start',
+                    sortable: false,
+                    value: 'date_start',
+                },
+                {
+                    text: 'Дата окончания',
+                    align: 'start',
+                    sortable: false,
+                    value: 'date_end',
+                },
+                {
+                    text: 'Цена',
+                    align: 'start',
+                    sortable: false,
+                    value: 'price',
+                },
+                {
+                    text: 'Баллы',
+                    align: 'start',
+                    sortable: false,
+                    value: 'score',
+                },
+                {
+                    text: 'Действия',
+                    align: 'start',
+                    sortable: false,
+                    value: 'actions',
+                },
+            ],
+            curses: [],
+            askTitle: "",
+            askText: "",
+
+            isEditCurse: false,
+            isShowASkEdit: false,
+
+            curseTitle: "",
+            editCurseId: null,
+            editCurse: null
         }
     },
-    components: {},
+    components: { TableVue, AskChanges, EditCurse },
     methods: {
         async checkAuth() {
             if(this.$store.getters['superuser/getTokens'].refresh) {
@@ -41,19 +129,35 @@ export default {
                 }
             }
         },
+        async getAllData() {},
+        toEditCurse(curse) {
+            this.askTitle = "Применить изменения?"
+            this.askText = "Изменения вступят в силу незамедлительно."
 
-        beforeMount() {
-            this.getAllData()
-
-            this.$store.commit('superuser/syncState')
-            if (!this.$store.getters['superuser/getIsAuth']) {
-                this.$router.push({path: `/dentalclik-dashboard/login`})
-            }
+            this.editCurseId = curse.curse_id
+            this.curseTitle = curse.title
+            this.editCurse = curse
+            this.isEditCurse = true
         },
-        beforeDestroy() {
-            this.$store.commit('superuser/saveState')
+        async saveEditCurse(dataCurse) {
+            this.isShowASkEdit = false
+
+            console.log(dataCurse)
+
+            this.isEditCurse = false
+        },
+    },
+    beforeMount() {
+        this.getAllData()
+
+        this.$store.commit('superuser/syncState')
+        if (!this.$store.getters['superuser/getIsAuth']) {
+            this.$router.push({path: `/dentalclik-dashboard/login`})
         }
     },
+    beforeDestroy() {
+        this.$store.commit('superuser/saveState')
+    }
 }
 </script>
 

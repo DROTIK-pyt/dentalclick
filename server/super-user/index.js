@@ -9,6 +9,28 @@ module.exports = function(app, upload) {
     const { sendEmail } = require('../sendMail') // Отправка сообщений на почту
     let dataUser = require('./dataUser')
 
+    app.get('/super-user/curse-categories', async (req, res) => {
+        const { curse_id } = req.body
+        const aCurse = await curse.findOne({
+            where: {
+                curse_id
+            }
+        })
+
+        const cats = await aCurse.getCategories()
+        const nameCats = []
+        const catIds = []
+        const cats2id = {}
+
+        cats.forEach(categ => {
+            nameCats.push(categ.title)
+            cats2id[`${categ.title}`] = categ.category_id
+            catIds.push(categ.category_id)
+        })
+
+        res.json({ok: true, nameCats, cats2id, catIds})
+    })
+
     app.get('/super-user/centers', async (req, res) => {
         const ec = await educationalCenter.findAll({
             attributes: [ 'educational_center_id', 'title', 'phone', 'contact_person' ]
