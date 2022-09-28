@@ -12,24 +12,30 @@
                 @editItem="toEditCurse"
             />
             <EditCurse
+                v-if="isEditCurse"
                 :titleCurse="curseTitle"
                 :isShow="isEditCurse"
-                :curse="editCurse"
+                :aCurse="editCurse"
+                :categoryItems="editCategories"
+                :allCategoryItem="editAllCategories"
+                :cat2idItems="editCats2id"
                 @close="isEditCurse = false"
-                @saveCurseItem="isShowASkEdit = true"
+                @saveCurseItem="saveCurseItem"
             />
             <AskChanges
                 :title="askTitle"
                 :text="askText"
                 :isShow="isShowASkEdit"
                 @yes="saveEditCurse"
-                @no="isEditCurse = false"
+                @no="isEditCurse = false; isShowASkEdit = false"
             />
         </v-col>
     </v-row>
 </template>
 
 <script>
+const baseSettings = require('../../../server/config/serverSetting')
+
 import TableVue from '@/components/generals/TableVue'
 import AskChanges from '@/components/generals/AskChanges'
 import EditCurse from '@/components/super-user/EditCurse'
@@ -96,11 +102,16 @@ export default {
             isShowASkEdit: false,
 
             curseTitle: "",
-            editCurseId: null,
-            editCurse: null
+            editCurseId: "",
+            editCurse: {},
+            editCategories: [],
+            editAllCategories: [],
+            editCats2id: {},
+
+            resultCurse: "",
         }
     },
-    components: { TableVue, AskChanges, EditCurse },
+    components: { TableVue, AskChanges, EditCurse, EditCurse },
     methods: {
         async checkAuth() {
             if(this.$store.getters['superuser/getTokens'].refresh) {
@@ -108,7 +119,7 @@ export default {
                 const payload = JSON.parse(base64.decode(this.$store.getters['superuser/getTokens'].access.split('.')[1]))
 
                 if(Math.ceil(Date.now()/1000) >= +payload.exp - 8) {
-                    const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/dentalclik-dashboard/refresh`, {
+                    const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/super-user/refresh`, {
                         method: "POST",
                         headers: {
                             'Content-Type': 'application/json;charset=utf-8',
@@ -130,24 +141,51 @@ export default {
             }
         },
         async getAllData() {
-            
+            const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/super-user/all-curse`)
+            const responsed = await result.json()
+
+            if(responsed.ok) {
+                this.curses = responsed.curses
+            }
         },
-        toEditCurse(curse) {
+        async toEditCurse(curse) {
             this.askTitle = "Применить изменения?"
             this.askText = "Изменения вступят в силу незамедлительно."
 
-            this.editCurseId = curse.curse_id
-            this.curseTitle = curse.title
-            this.editCurse = curse
-            this.isEditCurse = true
+            const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/super-user/curse-categories`, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8',
+                },
+                body: JSON.stringify({
+                    curse_id: curse.curse_id
+                })
+            })
+            const responsed = await result.json()
+
+            if(responsed.ok) {
+
+                this.editCategories = responsed.nameCats
+                this.editCats2id = responsed.cats2id
+                this.editAllCategories = responsed.allCats
+
+                this.editCurseId = curse.curse_id
+                this.curseTitle = curse.title
+                this.editCurse = curse
+                this.isEditCurse = true
+            }
         },
-        async saveEditCurse(dataCurse) {
+        async saveEditCurse() {
             this.isShowASkEdit = false
 
-            console.log(dataCurse)
+            console.log(this.resultCurse)
 
             this.isEditCurse = false
         },
+        saveCurseItem(dataCurse) {
+            this.isShowASkEdit = true
+            this.resultCurse = dataCurse
+        }
     },
     beforeMount() {
         this.getAllData()

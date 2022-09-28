@@ -9,7 +9,34 @@ module.exports = function(app, upload) {
     const { sendEmail } = require('../sendMail') // Отправка сообщений на почту
     let dataUser = require('./dataUser')
 
-    app.get('/super-user/curse-categories', async (req, res) => {
+    app.get('/super-user/all-curse', async (req, res) => {
+        const curses = await curse.findAll()
+        const result = []
+
+        for(let i = 0; i < curses.length; i++) {
+            const center = await curses[i].getEducational_centers({attributes: [ 'title' ]})
+            const item = curses[i]
+
+            result.push({
+                curse_id: item.curse_id,
+                title: item.title,
+                lector: item.lector,
+                date_start: item.date_start,
+                date_end: item.date_end,
+                program: item.program,
+                town: item.town,
+                price: item.price,
+                address: item.address,
+                score: item.score,
+                image: item.image,
+                eduCenter: center[0].title
+            })
+        }
+
+        res.json({ok: true, curses: result})
+    })
+
+    app.post('/super-user/curse-categories', async (req, res) => {
         const { curse_id } = req.body
         const aCurse = await curse.findOne({
             where: {
@@ -18,17 +45,29 @@ module.exports = function(app, upload) {
         })
 
         const cats = await aCurse.getCategories()
+
         const nameCats = []
         const catIds = []
         const cats2id = {}
+        let t = []
+        let allCats = []
+
+        const item = cats[0]
+
+        const center = await item.getEducational_centers()
+        t = await center[0].getCategories()
+
+        t.forEach(categ => {
+            allCats.push(categ.title)
+            cats2id[`${categ.title}`] = categ.category_id
+        })
 
         cats.forEach(categ => {
             nameCats.push(categ.title)
-            cats2id[`${categ.title}`] = categ.category_id
             catIds.push(categ.category_id)
         })
 
-        res.json({ok: true, nameCats, cats2id, catIds})
+        res.json({ok: true, nameCats, cats2id, catIds, allCats})
     })
 
     app.get('/super-user/centers', async (req, res) => {

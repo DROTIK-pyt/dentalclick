@@ -232,8 +232,8 @@ const status = sequelize.define('status', {
         allowNull: false,
     },
 }, {timestamps: false})
-curse.belongsToMany(status, {through: "curseCurseStatus"})
-status.belongsToMany(curse, {through: "curseCurseStatus"})
+curse.belongsToMany(status, {through: "curseStatus"})
+status.belongsToMany(curse, {through: "curseStatus"})
 
 educationalCenter.belongsToMany(status, {through: "ecStatus"})
 status.belongsToMany(educationalCenter, {through: "ecStatus"})

@@ -1134,7 +1134,8 @@ export default {
             formData.append('title', this.addCategoryTitle)
             formData.append('uniqueSuffix', this.addCategoryUniqueSuffix)
             formData.append('educational_center_id', this.$store.getters['eduCenter/getId'])
-            formData.append('image', this.addCategoryImage, this.addCategoryImage.name)
+            if(!!this.addCategoryImage)
+                formData.append('image', this.addCategoryImage, this.addCategoryImage.name)
 
             const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/edu-center/curses/category/add`, {
                 method: "POST",

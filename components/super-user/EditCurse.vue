@@ -24,7 +24,7 @@
                 <v-btn
                 dark
                 text
-                
+                @click="saveCurse"
                 >
                 Сохранить изменения
                 </v-btn>
@@ -45,7 +45,7 @@
                                 <v-list-item-content>
                                     <v-text-field
                                     label="Название"
-                                    v-model="editCurseItem.title"
+                                    v-model="aCurse.title"
                                 ></v-text-field>
                                 </v-list-item-content>
                             </v-list-item>
@@ -55,7 +55,7 @@
                                 label="Программа курса"
                                 rows="5"
                                 row-height="20"
-                                v-model="editCurseItem.program"
+                                v-model="aCurse.program"
                                 ></v-textarea>
                             </v-list-item>
                             <v-row>
@@ -70,7 +70,7 @@
                                         sm="12"
                                         >
                                         <span>Дата начала</span><br>
-                                        <br><v-date-picker v-model="editCurseItem.date_start"></v-date-picker>
+                                        <br><v-date-picker v-model="aCurse.date_start"></v-date-picker>
                                         </v-col>
                                         </v-list-item-content>
                                     </v-list-item>
@@ -86,7 +86,7 @@
                                         sm="12"
                                         >
                                         <span>Дата окончания</span><br>
-                                        <br><v-date-picker v-model="editCurseItem.date_end"></v-date-picker>
+                                        <br><v-date-picker v-model="aCurse.date_end"></v-date-picker>
                                         </v-col>
                                         </v-list-item-content>
                                     </v-list-item>
@@ -101,7 +101,7 @@
                             <v-list-item-content>
                             <v-text-field
                                 label="Город проведения"
-                                v-model="editCurseItem.town"
+                                v-model="aCurse.town"
                             ></v-text-field>
                             </v-list-item-content>
                         </v-list-item>
@@ -109,7 +109,7 @@
                             <v-list-item-content>
                             <v-text-field
                                 label="Адрес проведения"
-                                v-model="editCurseItem.address"
+                                v-model="aCurse.address"
                             ></v-text-field>
                             </v-list-item-content>
                         </v-list-item>
@@ -117,7 +117,7 @@
                             <v-list-item-content>
                             <v-text-field
                                 label="ФИО лектора(ов)"
-                                v-model="editCurseItem.lector"
+                                v-model="aCurse.lector"
                             ></v-text-field>
                             </v-list-item-content>
                         </v-list-item>
@@ -125,7 +125,7 @@
                             <v-list-item-content>
                             <v-text-field
                                 label="Цена"
-                                v-model="editCurseItem.price"
+                                v-model="aCurse.price"
                             ></v-text-field>
                             </v-list-item-content>
                         </v-list-item>
@@ -133,7 +133,7 @@
                             <v-list-item-content>
                             <v-text-field
                                 label="Баллы"
-                                v-model="editCurseItem.score"
+                                v-model="aCurse.score"
                             ></v-text-field>
                             </v-list-item-content>
                         </v-list-item>
@@ -143,8 +143,8 @@
                             sm="7"
                             >
                                 <v-select
-                                    v-model="editCurseCategories"
-                                    :items="categories"
+                                    v-model="editCategoryItems"
+                                    :items="allCategoryItem"
                                     attach
                                     chips
                                     label="Категории"
@@ -169,7 +169,13 @@
                             sm="9"
                             >
                             <v-img
-                            v-if="editCurseImagePreview"
+                            v-if="aCurse.image && !editCurseImagePreview"
+                            max-height="178"
+                            max-width="284"
+                            :src="aCurse.image"
+                            ></v-img>
+                            <v-img
+                            v-else
                             max-height="178"
                             max-width="284"
                             :src="editCurseImagePreview"
@@ -186,22 +192,15 @@
 </template>
 
 <script>
-const baseSettings = require('../../server/config/serverSetting')
-const base64 = require('base-64')
-
 export default {
     name: "EditCurse",
-    props: [ 'titleCurse', 'isShow', 'curse' ],
+    props: [ 'titleCurse', 'isShow', 'aCurse', 'categoryItems', 'cat2idItems', 'allCategoryItem' ],
     data() {
         return {
-            editCurseItem: {},
             editCurseImage: "",
+            editCategoryItems: "",
             editCurseImagePreview: "",
             editCurseUniqueSuffix: "",
-
-            editCurseCategories: [],
-            categories: [],
-            cats2id: {}, // title -> curse_id
 
             resultCategoryIds: []
         }
@@ -221,35 +220,18 @@ export default {
             }
         },
         saveCurse() {
-            this.editCurseCategories.forEach(cat => {
-                this.resultCategoryIds.push(this.cats2id[cat])
+
+            this.editCategoryItems.forEach(cat => {
+                this.resultCategoryIds.push(this.cat2idItems[cat]) // title -> curse_id
             })
 
             this.resultCategoryIds = [...new Set(this.resultCategoryIds)]
-            this.$emit('saveCurseItem', {curse: this.editCurse, image: {src: this.editCurseImage, suffix: this.editCurseUniqueSuffix}, catIds: this.resultCategoryIds})
+            const result = {curse: this.aCurse, image: {src: this.editCurseImage, suffix: this.editCurseUniqueSuffix}, catIds: this.resultCategoryIds}
+            this.$emit('saveCurseItem', result)
         }
     },
-    async beforeMount() {
-        this.editCurseItem = this.curse || {}
-        if(this.editCurseItem) {
-            return
-        }
-
-        const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/super-user/curse-categories`, {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json;charset=utf-8',
-            },
-            body: JSON.stringify({
-                curse_id: curse.curse_id
-            })
-        })
-        const responsed = result.json()
-        if(responsed.ok) {
-            this.categories = responsed.nameCats
-            this.cats2id = responsed.cats2id
-            this.resultCategoryIds = catIds
-        }
+    beforeMount() {
+        this.editCategoryItems = this.categoryItems
     }
 }
 </script>

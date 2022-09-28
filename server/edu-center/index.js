@@ -347,7 +347,7 @@ module.exports = function(app, upload) {
         const educational_center_id = req.body.educational_center_id
         const ec = await educationalCenter.findOne({
             where: {
-                educational_center_id: educational_center_id
+                educational_center_id
             }
         })
 
@@ -370,11 +370,16 @@ module.exports = function(app, upload) {
 
     app.post('/edu-center/curses/category/add', upload.single('image'), async (req, res) => {
         const educational_center_id = req.body.educational_center_id
+        let imageSrc
 
-        let arr = req.file.originalname.split('.')
-        const extension = arr.slice(-1)[0]
+        if (req.file) {
+            let arr = req.file.originalname.split('.')
+            const extension = arr.slice(-1)[0]
 
-        const imageSrc = `/uploads/${req.body.uniqueSuffix}.${extension}`
+            imageSrc = `/uploads/${req.body.uniqueSuffix}.${extension}`
+        } else {
+            imageSrc = ``
+        }
         
         const aCategory = await category.create({
             title: req.body.title,
