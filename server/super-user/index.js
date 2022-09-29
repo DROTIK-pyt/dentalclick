@@ -9,6 +9,67 @@ module.exports = function(app, upload) {
     const { sendEmail } = require('../sendMail') // Отправка сообщений на почту
     let dataUser = require('./dataUser')
 
+    // login: CNSUEE
+    // pass: ZbPZP*>6
+
+    app.post('/super-user/put-curses', upload.single('image'), async (req, res) => {
+        let imageSrc
+        if (req.file) {
+            let arr = req.file.originalname.split('.')
+            const extension = arr.slice(-1)[0]
+
+            imageSrc = `/uploads/${req.body.uniqueSuffix}.${extension}`
+
+            const image = await curse.findOne({where: {curse_id: req.body.curse_id}})
+
+            fs.unlink(`../static${image.image}`, (err) => {console.log(err)})
+        } else {
+            imageSrc = ``
+        }
+
+        await curse.update({
+            title: req.body.title,
+            program: req.body.program,
+            town: req.body.town,
+            address: req.body.address,
+            lector: req.body.lector,
+            date_start: req.body.date_start,
+            date_end: req.body.date_end,
+            price: req.body.price,
+            score: req.body.score,
+            image: imageSrc,
+        }, {
+            where: {
+                curse_id: req.body.curse_id
+            }
+        })
+
+        const aCurse = await curse.findOne({
+            where: {
+                curse_id: req.body.curse_id
+            }
+        })
+        aCurse.setCategories(null)
+
+        const { categories } = req.body
+        let category_id
+        let cat
+
+        for(let i = 0; i < categories.length; i++) {
+            category_id = categories[i]
+
+            cat = await category.findOne({
+                where: {
+                    category_id
+                }
+            })
+
+            await aCurse.addCategory(cat)
+        }
+
+        res.json({ok: true})
+    })
+
     app.get('/super-user/all-curse', async (req, res) => {
         const curses = await curse.findAll()
         const result = []
@@ -236,8 +297,6 @@ module.exports = function(app, upload) {
     })
 
     app.post('/super-user/login', async (req, res) => {
-        // login: CNSUEE
-        // pass: ZbPZP*>6
         const md5 = require('md5')
         const dataUser = require('./dataUser')
         const { login, password } = req.body

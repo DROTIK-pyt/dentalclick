@@ -192,6 +192,8 @@
 </template>
 
 <script>
+const { v4: uuidv4 } = require('uuid')
+
 export default {
     name: "EditCurse",
     props: [ 'titleCurse', 'isShow', 'aCurse', 'categoryItems', 'cat2idItems', 'allCategoryItem' ],

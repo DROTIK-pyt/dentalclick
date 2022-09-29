@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS `categories` (
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime NOT NULL,
   PRIMARY KEY (`category_id`)
-) ENGINE = InnoDB AUTO_INCREMENT = 5 DEFAULT CHARSET = utf8;
+) ENGINE = InnoDB AUTO_INCREMENT = 6 DEFAULT CHARSET = utf8;
 
 # ------------------------------------------------------------
 # SCHEMA DUMP FOR TABLE: curse_statuses
@@ -126,11 +126,11 @@ CREATE TABLE IF NOT EXISTS `cursecursestatus` (
   `createdAt` datetime NOT NULL,
   `updatedAt` datetime NOT NULL,
   `curseCurseId` int(11) NOT NULL,
-  `statusStatusId` int(11) NOT NULL,
-  PRIMARY KEY (`curseCurseId`, `statusStatusId`),
-  KEY `statusStatusId` (`statusStatusId`),
+  `statusCurseStatusId` int(11) NOT NULL,
+  PRIMARY KEY (`curseCurseId`, `statusCurseStatusId`),
+  KEY `statusCurseStatusId` (`statusCurseStatusId`),
   CONSTRAINT `cursecursestatus_ibfk_1` FOREIGN KEY (`curseCurseId`) REFERENCES `curses` (`curse_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `cursecursestatus_ibfk_2` FOREIGN KEY (`statusStatusId`) REFERENCES `statuses` (`status_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `cursecursestatus_ibfk_2` FOREIGN KEY (`statusCurseStatusId`) REFERENCES `statuses` (`status_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8;
 
 # ------------------------------------------------------------
@@ -153,6 +153,36 @@ CREATE TABLE IF NOT EXISTS `curses` (
   `updatedAt` datetime NOT NULL,
   PRIMARY KEY (`curse_id`)
 ) ENGINE = InnoDB AUTO_INCREMENT = 9 DEFAULT CHARSET = utf8;
+
+# ------------------------------------------------------------
+# SCHEMA DUMP FOR TABLE: cursestatus
+# ------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS `cursestatus` (
+  `createdAt` datetime NOT NULL,
+  `updatedAt` datetime NOT NULL,
+  `curseCurseId` int(11) NOT NULL,
+  `statusStatusId` int(11) NOT NULL,
+  PRIMARY KEY (`curseCurseId`, `statusStatusId`),
+  KEY `statusStatusId` (`statusStatusId`),
+  CONSTRAINT `cursestatus_ibfk_1` FOREIGN KEY (`curseCurseId`) REFERENCES `curses` (`curse_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `cursestatus_ibfk_2` FOREIGN KEY (`statusStatusId`) REFERENCES `statuses` (`status_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8;
+
+# ------------------------------------------------------------
+# SCHEMA DUMP FOR TABLE: docstatus
+# ------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS `docstatus` (
+  `createdAt` datetime NOT NULL,
+  `updatedAt` datetime NOT NULL,
+  `doctorDoctorId` int(11) NOT NULL,
+  `statusStatusId` int(11) NOT NULL,
+  PRIMARY KEY (`doctorDoctorId`, `statusStatusId`),
+  KEY `statusStatusId` (`statusStatusId`),
+  CONSTRAINT `docstatus_ibfk_1` FOREIGN KEY (`doctorDoctorId`) REFERENCES `doctors` (`doctor_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `docstatus_ibfk_2` FOREIGN KEY (`statusStatusId`) REFERENCES `statuses` (`status_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8;
 
 # ------------------------------------------------------------
 # SCHEMA DUMP FOR TABLE: doctorar
@@ -272,6 +302,24 @@ CREATE TABLE IF NOT EXISTS `ecrubrics` (
 ) ENGINE = InnoDB DEFAULT CHARSET = utf8;
 
 # ------------------------------------------------------------
+# SCHEMA DUMP FOR TABLE: ecstatus
+# ------------------------------------------------------------
+
+CREATE TABLE IF NOT EXISTS `ecstatus` (
+  `createdAt` datetime NOT NULL,
+  `updatedAt` datetime NOT NULL,
+  `educationalCenterEducationalCenterId` int(11) NOT NULL,
+  `statusStatusId` int(11) NOT NULL,
+  PRIMARY KEY (
+  `educationalCenterEducationalCenterId`,
+  `statusStatusId`
+  ),
+  KEY `statusStatusId` (`statusStatusId`),
+  CONSTRAINT `ecstatus_ibfk_1` FOREIGN KEY (`educationalCenterEducationalCenterId`) REFERENCES `educational_centers` (`educational_center_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `ecstatus_ibfk_2` FOREIGN KEY (`statusStatusId`) REFERENCES `statuses` (`status_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE = InnoDB DEFAULT CHARSET = utf8;
+
+# ------------------------------------------------------------
 # SCHEMA DUMP FOR TABLE: educational_centers
 # ------------------------------------------------------------
 
@@ -329,7 +377,7 @@ CREATE TABLE IF NOT EXISTS `rubrics` (
   `rubrics_id` int(11) NOT NULL AUTO_INCREMENT,
   `title` varchar(255) NOT NULL,
   PRIMARY KEY (`rubrics_id`)
-) ENGINE = InnoDB AUTO_INCREMENT = 12 DEFAULT CHARSET = utf8;
+) ENGINE = InnoDB AUTO_INCREMENT = 11 DEFAULT CHARSET = utf8;
 
 # ------------------------------------------------------------
 # SCHEMA DUMP FOR TABLE: statuses
@@ -339,7 +387,7 @@ CREATE TABLE IF NOT EXISTS `statuses` (
   `status_id` int(11) NOT NULL AUTO_INCREMENT,
   `title` varchar(255) NOT NULL,
   PRIMARY KEY (`status_id`)
-) ENGINE = InnoDB AUTO_INCREMENT = 3 DEFAULT CHARSET = utf8;
+) ENGINE = InnoDB AUTO_INCREMENT = 4 DEFAULT CHARSET = utf8;
 
 # ------------------------------------------------------------
 # DATA DUMP FOR TABLE: access_rights
@@ -500,7 +548,7 @@ VALUES
     'title1',
     'asdasdasd',
     '2022-07-17 20:22:52',
-    '2022-09-20 09:18:18'
+    '2022-07-17 21:20:03'
   );
 
 # ------------------------------------------------------------
@@ -529,16 +577,7 @@ INSERT INTO
     `rubricRubricsId`
   )
 VALUES
-  ('2022-09-20 09:18:18', '2022-09-20 09:18:18', 1, 10);
-INSERT INTO
-  `articlesrubrics` (
-    `createdAt`,
-    `updatedAt`,
-    `articleArticlesId`,
-    `rubricRubricsId`
-  )
-VALUES
-  ('2022-09-20 09:18:18', '2022-09-20 09:18:18', 1, 11);
+  ('2022-07-17 21:20:03', '2022-07-17 21:20:03', 1, 10);
 
 # ------------------------------------------------------------
 # DATA DUMP FOR TABLE: categories
@@ -592,6 +631,22 @@ VALUES
     '2022-09-14 18:29:25',
     '2022-09-14 18:29:25'
   );
+INSERT INTO
+  `categories` (
+    `category_id`,
+    `title`,
+    `image`,
+    `createdAt`,
+    `updatedAt`
+  )
+VALUES
+  (
+    5,
+    'adsfasdfsdf',
+    '',
+    '2022-09-28 20:24:19',
+    '2022-09-28 20:24:19'
+  );
 
 # ------------------------------------------------------------
 # DATA DUMP FOR TABLE: curse_statuses
@@ -610,7 +665,7 @@ INSERT INTO
     `categoryCategoryId`
   )
 VALUES
-  ('2022-08-31 22:21:41', '2022-08-31 22:21:41', 6, 2);
+  ('2022-09-29 20:48:25', '2022-09-29 20:48:25', 6, 2);
 INSERT INTO
   `cursecategory` (
     `createdAt`,
@@ -619,7 +674,16 @@ INSERT INTO
     `categoryCategoryId`
   )
 VALUES
-  ('2022-08-31 22:21:41', '2022-08-31 22:21:41', 6, 3);
+  ('2022-09-29 20:48:25', '2022-09-29 20:48:25', 6, 3);
+INSERT INTO
+  `cursecategory` (
+    `createdAt`,
+    `updatedAt`,
+    `curseCurseId`,
+    `categoryCategoryId`
+  )
+VALUES
+  ('2022-09-29 20:48:25', '2022-09-29 20:48:25', 6, 5);
 INSERT INTO
   `cursecategory` (
     `createdAt`,
@@ -646,7 +710,7 @@ INSERT INTO
     `categoryCategoryId`
   )
 VALUES
-  ('2022-09-14 18:30:02', '2022-09-14 18:30:02', 8, 4);
+  ('2022-09-29 20:49:34', '2022-09-29 20:49:34', 8, 4);
 
 # ------------------------------------------------------------
 # DATA DUMP FOR TABLE: cursecursestatus
@@ -657,28 +721,28 @@ INSERT INTO
     `createdAt`,
     `updatedAt`,
     `curseCurseId`,
-    `statusStatusId`
+    `statusCurseStatusId`
   )
 VALUES
-  ('2022-09-20 12:14:47', '2022-09-20 12:14:47', 6, 1);
+  ('2022-09-03 10:20:38', '2022-09-03 10:20:38', 6, 1);
 INSERT INTO
   `cursecursestatus` (
     `createdAt`,
     `updatedAt`,
     `curseCurseId`,
-    `statusStatusId`
+    `statusCurseStatusId`
   )
 VALUES
-  ('2022-09-20 12:14:47', '2022-09-20 12:14:47', 7, 1);
+  ('2022-07-18 14:17:12', '2022-07-18 14:17:12', 7, 1);
 INSERT INTO
   `cursecursestatus` (
     `createdAt`,
     `updatedAt`,
     `curseCurseId`,
-    `statusStatusId`
+    `statusCurseStatusId`
   )
 VALUES
-  ('2022-09-20 12:14:47', '2022-09-20 12:14:47', 8, 1);
+  ('2022-09-14 18:30:02', '2022-09-14 18:30:02', 8, 1);
 
 # ------------------------------------------------------------
 # DATA DUMP FOR TABLE: curses
@@ -703,18 +767,18 @@ INSERT INTO
 VALUES
   (
     6,
-    'asdAasdds',
-    'asdasd',
-    'asd',
+    'testetsetset',
+    'asdasdasdasd\r\nasdasd\r\nasdasdasd',
+    '123123123123',
     'asd',
     'asd',
     '2022-07-21',
-    '2022-07-23',
+    '2022-11-30',
     '123',
     122,
-    '/uploads/a6d4ce57-1db0-4c64-bf88-84140ac9dbae.png',
+    '/uploads/f7445a24-d32c-453c-ace0-bec5ee098a76.png',
     '2022-07-17 21:34:11',
-    '2022-08-31 22:21:41'
+    '2022-09-29 20:48:25'
   );
 INSERT INTO
   `curses` (
@@ -776,10 +840,47 @@ VALUES
     '2022-09-30',
     '3425234',
     0,
-    '/uploads/9a21ed45-f98d-4128-a4c5-23eea5c564b3.jpg',
+    '/uploads/114f1096-2bff-4263-be5d-d41d531f6904.png',
     '2022-09-14 18:30:02',
-    '2022-09-14 18:30:02'
+    '2022-09-29 20:49:34'
   );
+
+# ------------------------------------------------------------
+# DATA DUMP FOR TABLE: cursestatus
+# ------------------------------------------------------------
+
+INSERT INTO
+  `cursestatus` (
+    `createdAt`,
+    `updatedAt`,
+    `curseCurseId`,
+    `statusStatusId`
+  )
+VALUES
+  ('2022-09-28 23:19:21', '2022-09-28 23:19:21', 6, 1);
+INSERT INTO
+  `cursestatus` (
+    `createdAt`,
+    `updatedAt`,
+    `curseCurseId`,
+    `statusStatusId`
+  )
+VALUES
+  ('2022-09-28 23:19:21', '2022-09-28 23:19:21', 7, 1);
+INSERT INTO
+  `cursestatus` (
+    `createdAt`,
+    `updatedAt`,
+    `curseCurseId`,
+    `statusStatusId`
+  )
+VALUES
+  ('2022-09-28 23:19:21', '2022-09-28 23:19:21', 8, 1);
+
+# ------------------------------------------------------------
+# DATA DUMP FOR TABLE: docstatus
+# ------------------------------------------------------------
+
 
 # ------------------------------------------------------------
 # DATA DUMP FOR TABLE: doctorar
@@ -798,7 +899,7 @@ INSERT INTO
     `curseCurseId`
   )
 VALUES
-  ('2022-09-20 09:05:04', '2022-09-20 09:05:04', 1, 6);
+  ('2022-09-15 09:53:50', '2022-09-15 09:53:50', 1, 6);
 INSERT INTO
   `doctorcurse` (
     `createdAt`,
@@ -807,7 +908,7 @@ INSERT INTO
     `curseCurseId`
   )
 VALUES
-  ('2022-09-20 09:05:03', '2022-09-20 09:05:03', 1, 8);
+  ('2022-09-15 09:53:50', '2022-09-15 09:53:50', 1, 8);
 
 # ------------------------------------------------------------
 # DATA DUMP FOR TABLE: doctormoder
@@ -920,10 +1021,10 @@ VALUES
     'ivan.spiridonov.0100@mail.ru',
     '202cb962ac59075b964b07152d234b70',
     'Moscow',
-    '145fd2b2-84d2-4446-9f1e-62fb665197e4',
+    '236502f8-c018-4439-95b6-732e33963512',
     'Ортопедия',
     '2022-09-13 11:40:30',
-    '2022-09-20 09:04:11'
+    '2022-09-22 22:01:53'
   );
 
 # ------------------------------------------------------------
@@ -948,6 +1049,15 @@ INSERT INTO
   )
 VALUES
   ('2022-08-31 22:02:29', '2022-08-31 22:02:29', 1, 3);
+INSERT INTO
+  `eccategory` (
+    `createdAt`,
+    `updatedAt`,
+    `educationalCenterEducationalCenterId`,
+    `categoryCategoryId`
+  )
+VALUES
+  ('2022-09-28 20:24:20', '2022-09-28 20:24:20', 1, 5);
 INSERT INTO
   `eccategory` (
     `createdAt`,
@@ -1003,15 +1113,29 @@ INSERT INTO
   )
 VALUES
   ('2022-07-17 20:25:34', '2022-07-17 20:25:34', 1, 10);
+
+# ------------------------------------------------------------
+# DATA DUMP FOR TABLE: ecstatus
+# ------------------------------------------------------------
+
 INSERT INTO
-  `ecrubrics` (
+  `ecstatus` (
     `createdAt`,
     `updatedAt`,
     `educationalCenterEducationalCenterId`,
-    `rubricRubricsId`
+    `statusStatusId`
   )
 VALUES
-  ('2022-09-20 09:18:13', '2022-09-20 09:18:13', 1, 11);
+  ('2022-09-28 20:03:39', '2022-09-28 20:03:39', 1, 1);
+INSERT INTO
+  `ecstatus` (
+    `createdAt`,
+    `updatedAt`,
+    `educationalCenterEducationalCenterId`,
+    `statusStatusId`
+  )
+VALUES
+  ('2022-09-28 20:03:17', '2022-09-28 20:03:17', 2, 1);
 
 # ------------------------------------------------------------
 # DATA DUMP FOR TABLE: educational_centers
@@ -1038,14 +1162,14 @@ VALUES
     'title1',
     'person',
     '289347982374',
-    'ex@mail.ru',
+    'ivan.spiridonov.0100@mail.ru',
     '202cb962ac59075b964b07152d234b70',
     'url',
     'requisites',
     'requisites\r\nrequisites',
-    '79f363dd-1b40-42de-9ef8-3994ba645773',
+    'c421357a-cb66-4e98-9904-02634ec28c4b',
     '2022-07-17 23:11:06',
-    '2022-09-20 09:15:33'
+    '2022-09-28 20:21:07'
   );
 INSERT INTO
   `educational_centers` (
@@ -1065,7 +1189,7 @@ INSERT INTO
 VALUES
   (
     2,
-    'text123',
+    'text12',
     'IVAN',
     '23894890234902394',
     'ex2@mail.ru',
@@ -1073,9 +1197,9 @@ VALUES
     '///',
     'requisites\r\nrequisites',
     'requisites',
-    '7d0e7f06-8d19-41e9-8985-d009385efb89',
+    'c94f8624-7498-416e-a065-5538bb4e5fdb',
     '2022-09-14 21:27:17',
-    '2022-09-14 18:27:55'
+    '2022-09-28 20:13:33'
   );
 
 # ------------------------------------------------------------
@@ -1465,11 +1589,7 @@ VALUES
 INSERT INTO
   `rubrics` (`rubrics_id`, `title`)
 VALUES
-  (10, 'rub2фыв');
-INSERT INTO
-  `rubrics` (`rubrics_id`, `title`)
-VALUES
-  (11, 'qwe123dsfsdfsd');
+  (10, 'rub2');
 
 # ------------------------------------------------------------
 # DATA DUMP FOR TABLE: statuses
@@ -1483,6 +1603,10 @@ INSERT INTO
   `statuses` (`status_id`, `title`)
 VALUES
   (2, 'trashed');
+INSERT INTO
+  `statuses` (`status_id`, `title`)
+VALUES
+  (3, 'blocked');
 
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;

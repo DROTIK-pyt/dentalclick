@@ -34,6 +34,7 @@
 </template>
 
 <script>
+const base64 = require('base-64')
 const baseSettings = require('../../../server/config/serverSetting')
 
 import TableVue from '@/components/generals/TableVue'
@@ -76,7 +77,7 @@ export default {
                     value: 'date_end',
                 },
                 {
-                    text: 'Цена',
+                    text: 'Цена ₽',
                     align: 'start',
                     sortable: false,
                     value: 'price',
@@ -141,6 +142,8 @@ export default {
             }
         },
         async getAllData() {
+            this.checkAuth()
+
             const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/super-user/all-curse`)
             const responsed = await result.json()
 
@@ -149,6 +152,8 @@ export default {
             }
         },
         async toEditCurse(curse) {
+            this.checkAuth()
+
             this.askTitle = "Применить изменения?"
             this.askText = "Изменения вступят в силу незамедлительно."
 
@@ -176,13 +181,47 @@ export default {
             }
         },
         async saveEditCurse() {
+            this.checkAuth()
+
             this.isShowASkEdit = false
 
-            console.log(this.resultCurse)
+            // console.log(this.resultCurse.image.src.name)
 
-            this.isEditCurse = false
+            let formData = new FormData()
+
+            formData.append('curse_id', this.resultCurse.curse.curse_id)
+            formData.append('title', this.resultCurse.curse.title)
+            formData.append('program', this.resultCurse.curse.program)
+            formData.append('town', this.resultCurse.curse.town)
+            formData.append('address', this.resultCurse.curse.address)
+            formData.append('lector', this.resultCurse.curse.lector)
+            formData.append('date_start', this.resultCurse.curse.date_start)
+            formData.append('date_end', this.resultCurse.curse.date_end)
+            formData.append('price', this.resultCurse.curse.price)
+            formData.append('score', this.resultCurse.curse.score)
+            formData.append('categories', JSON.stringify(this.resultCurse.catIds))
+            formData.append('uniqueSuffix', this.resultCurse.image.suffix)
+            if(this.resultCurse.image.src)
+                formData.append('image', this.resultCurse.image.src, this.resultCurse.image.src.name)
+
+            const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/super-user/put-curses`, {
+                method: "POST",
+                headers: {
+                    // 'Content-Type': 'multipart/form-data;boundary=MyBoundary'
+                    // 'Content-Type': 'application/json;charset=utf-8'
+                },
+                body: formData
+            })
+            const responsed = await result.json()
+            if(responsed.ok) {
+                this.isEditCurse = false
+
+                this.getAllData()
+            }
         },
         saveCurseItem(dataCurse) {
+            this.checkAuth()
+
             this.isShowASkEdit = true
             this.resultCurse = dataCurse
         }
