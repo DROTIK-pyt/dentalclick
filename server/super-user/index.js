@@ -1,5 +1,5 @@
 module.exports = function(app, upload) {
-    const { educationalCenter, moderation, articles, rubrics, curse, category, status, Op } = require('../db/scheme')
+    const { educationalCenter, moderation, articles, rubrics, curse, category, status, doctor, Op } = require('../db/scheme')
     const signature = "FJWr"
     const { v4: uuidv4 } = require('uuid')
     const jwt = require('jsonwebtoken')
@@ -11,6 +11,85 @@ module.exports = function(app, upload) {
 
     // login: CNSUEE
     // pass: ZbPZP*>6
+
+    app.put('/super-user/doctor', async (req, res) => {
+        const { aDoctor, aStatus } = req.body.data
+
+        if (aDoctor?.newPassword) {
+            await doctor.update({
+                name: aDoctor.name,
+                phone: aDoctor.phone,
+                email: aDoctor.email,
+                password: md5(aDoctor.newPassword),
+                region: aDoctor.region,
+                specialization: aDoctor.specialization,
+            }, {
+                where: {
+                    doctor_id: aDoctor.doctor_id
+                }
+            })
+        } else {
+            await doctor.update({
+                name: aDoctor.name,
+                phone: aDoctor.phone,
+                email: aDoctor.email,
+                region: aDoctor.region,
+                specialization: aDoctor.specialization,
+            }, {
+                where: {
+                    doctor_id: aDoctor.doctor_id
+                }
+            })
+        }
+
+        const doc = await doctor.findOne({
+            where: {
+                doctor_id: aDoctor.doctor_id
+            }
+        })
+
+        const docStatus = await status.findOne({
+            where: {
+                status_id: aStatus
+            }
+        })
+
+        await doc.setStatuses(null)
+
+        await doc.addStatus(docStatus)
+
+        res.json({ok: true})
+    })
+
+    app.post('/super-user/doctor-status', async (req, res) => {
+        const { doctor_id } = req.body
+
+        const doc = await doctor.findOne({
+            where: {
+                doctor_id
+            }
+        })
+
+        const docStatus = await doc.getStatuses()
+
+        if(docStatus.length === 0) {
+            res.json({ok: true, status: "Доступен"})
+        } else if(docStatus[0].title === "public") {
+            res.json({ok: true, status: "Доступен"})
+        } else if(docStatus[0].title === "blocked") {
+            res.json({ok: true, status: "Заблокирован"})
+        } else {
+            res.json({ok: true, status: "Доступен"})
+        }
+    })
+
+    app.get('/super-user/doctors', async (req, res) => {
+        const docs = await doctor.findAll({
+            attributes: [ 'doctor_id', 'name', 'email', 'phone', 'region', 'specialization' ]
+        })
+
+        res.json({ok: true, docs})
+    })
 
     app.post('/super-user/put-curses', upload.single('image'), async (req, res) => {
         let imageSrc
