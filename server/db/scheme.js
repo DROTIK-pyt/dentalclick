@@ -253,11 +253,6 @@ const moderation = sequelize.define('moderation', {
         allowNull: false,
     }
 })
-moderation.belongsToMany(educationalCenter, {through: "moderEC"})
-educationalCenter.belongsToMany(moderation, {through: "moderEC"})
-
-doctor.belongsToMany(moderation, {through: "doctorModer"})
-moderation.belongsToMany(doctor, {through: "doctorModer"})
 
 module.exports = {
     dbBaseSetting,
