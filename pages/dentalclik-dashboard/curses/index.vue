@@ -19,6 +19,7 @@
                 :categoryItems="editCategories"
                 :allCategoryItem="editAllCategories"
                 :cat2idItems="editCats2id"
+                :statusCurse="statusCurse"
                 @close="isEditCurse = false"
                 @saveCurseItem="saveCurseItem"
             />
@@ -29,6 +30,28 @@
                 @yes="saveEditCurse"
                 @no="isEditCurse = false; isShowASkEdit = false"
             />
+        </v-col>
+        <v-col>
+            <v-btn
+                class="ma-2"
+                :loading="loading"
+                :disabled="loading"
+                color="info"
+                @click="updateAllData"
+                >
+                Обновить курсы
+                <template v-slot:loader>
+                    <span class="custom-loader">
+                    <v-icon light>mdi-cached</v-icon>
+                    </span>
+                </template>
+            </v-btn>
+            <v-select
+                v-model="currentStatus"
+                :items="items"
+                label="Статус"
+                solo
+            ></v-select>
         </v-col>
     </v-row>
 </template>
@@ -95,12 +118,18 @@ export default {
                     value: 'actions',
                 },
             ],
-            curses: [],
+            trashedCurses: [],
+            publicCurses: [],
+            allCurses: [],
+
+            items: [ 'Все', 'В корзине', 'Опубликованные' ],
+            currentStatus: "Все",
             askTitle: "",
             askText: "",
 
             isEditCurse: false,
             isShowASkEdit: false,
+            loading: false,
 
             curseTitle: "",
             editCurseId: "",
@@ -108,11 +137,25 @@ export default {
             editCategories: [],
             editAllCategories: [],
             editCats2id: {},
+            statusCurse: {},
 
             resultCurse: "",
         }
     },
     components: { TableVue, AskChanges, EditCurse, EditCurse },
+    computed: {
+        curses() {
+            if(this.currentStatus === "Все") {
+                return this.allCurses
+            }
+            if(this.currentStatus === "В корзине") {
+                return this.trashedCurses
+            }
+            if(this.currentStatus === "Опубликованные") {
+                return this.publicCurses
+            }
+        }
+    },
     methods: {
         async checkAuth() {
             if(this.$store.getters['superuser/getTokens'].refresh) {
@@ -148,8 +191,21 @@ export default {
             const responsed = await result.json()
 
             if(responsed.ok) {
-                this.curses = responsed.curses
+                this.allCurses = responsed.curses
+                this.trashedCurses = responsed.trashed
+                this.publicCurses = responsed.public
             }
+        },
+        updateAllData() {
+            this.checkAuth()
+
+            this.loading = true
+
+            this.getAllData()
+
+            setTimeout(() => {
+                this.loading = false
+            }, 300)
         },
         async toEditCurse(curse) {
             this.checkAuth()
@@ -157,7 +213,7 @@ export default {
             this.askTitle = "Применить изменения?"
             this.askText = "Изменения вступят в силу незамедлительно."
 
-            const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/super-user/curse-categories`, {
+            const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/super-user/data-curse`, {
                 method: "POST",
                 headers: {
                     'Content-Type': 'application/json;charset=utf-8',
@@ -173,6 +229,12 @@ export default {
                 this.editCategories = responsed.nameCats
                 this.editCats2id = responsed.cats2id
                 this.editAllCategories = responsed.allCats
+
+                if(responsed.statusCurse.length == 0) {
+                    this.statusCurse.status_id = 1
+                } else {
+                    this.statusCurse.status_id = responsed.statusCurse[0].status_id
+                }
 
                 this.editCurseId = curse.curse_id
                 this.curseTitle = curse.title
@@ -199,6 +261,7 @@ export default {
             formData.append('date_end', this.resultCurse.curse.date_end)
             formData.append('price', this.resultCurse.curse.price)
             formData.append('score', this.resultCurse.curse.score)
+            formData.append('status_id', this.resultCurse.status_id)
             formData.append('categories', JSON.stringify(this.resultCurse.catIds))
             formData.append('uniqueSuffix', this.resultCurse.image.suffix)
             if(this.resultCurse.image.src)
@@ -241,5 +304,40 @@ export default {
 </script>
 
 <style scoped>
-
+.custom-loader {
+    animation: loader 1s infinite;
+    display: flex;
+  }
+  @-moz-keyframes loader {
+    from {
+      transform: rotate(0);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @-webkit-keyframes loader {
+    from {
+      transform: rotate(0);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @-o-keyframes loader {
+    from {
+      transform: rotate(0);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @keyframes loader {
+    from {
+      transform: rotate(0);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
 </style>

@@ -140,7 +140,7 @@
                         <v-list-item>
                             <v-col
                             cols="12"
-                            sm="7"
+                            sm="6"
                             >
                                 <v-select
                                     v-model="editCategoryItems"
@@ -149,6 +149,17 @@
                                     chips
                                     label="Категории"
                                     multiple
+                                ></v-select>
+                            </v-col>
+                            <v-col
+                            cols="12"
+                            sm="6"
+                            >
+                                <v-select
+                                    v-model="currentStatus"
+                                    :items="itemStatuses"
+                                    label="Статус"
+                                    solo
                                 ></v-select>
                             </v-col>
                         </v-list-item>
@@ -196,13 +207,26 @@ const { v4: uuidv4 } = require('uuid')
 
 export default {
     name: "EditCurse",
-    props: [ 'titleCurse', 'isShow', 'aCurse', 'categoryItems', 'cat2idItems', 'allCategoryItem' ],
+    props: [ 'titleCurse', 'isShow', 'aCurse', 'categoryItems', 'cat2idItems', 'allCategoryItem', 'statusCurse' ],
     data() {
         return {
             editCurseImage: "",
             editCategoryItems: "",
             editCurseImagePreview: "",
             editCurseUniqueSuffix: "",
+
+            currentStatus: "",
+            itemStatuses:  [ "Опубликован", "В корзине" ],
+
+            idStatus2title: {
+                1: "Опубликован",
+                2: "В корзине"
+            },
+
+            statusTitle2id: {
+                "Опубликован": 1,
+                "В корзине": 2
+            },
 
             resultCategoryIds: []
         }
@@ -228,12 +252,13 @@ export default {
             })
 
             this.resultCategoryIds = [...new Set(this.resultCategoryIds)]
-            const result = {curse: this.aCurse, image: {src: this.editCurseImage, suffix: this.editCurseUniqueSuffix}, catIds: this.resultCategoryIds}
+            const result = {curse: this.aCurse, image: {src: this.editCurseImage, suffix: this.editCurseUniqueSuffix}, catIds: this.resultCategoryIds, status_id: this.statusTitle2id[this.currentStatus]}
             this.$emit('saveCurseItem', result)
         }
     },
     beforeMount() {
         this.editCategoryItems = this.categoryItems
+        this.currentStatus = this.idStatus2title[this.statusCurse.status_id]
     }
 }
 </script>

@@ -129,6 +129,15 @@ module.exports = function(app, upload) {
             }
         })
         aCurse.setCategories(null)
+        aCurse.setStatuses(null)
+
+        const statusCurse = await status.findOne({
+            where: {
+                status_id: req.body.status_id
+            }
+        })
+
+        await aCurse.addStatus(statusCurse)
 
         const { categories } = req.body
         let category_id
@@ -152,6 +161,63 @@ module.exports = function(app, upload) {
     app.get('/super-user/all-curse', async (req, res) => {
         const curses = await curse.findAll()
         const result = []
+        const resultTrashed = []
+        const resultPublic = []
+
+        const trashedStatus = await status.findOne({
+            where: {
+                title: "trashed"
+            }
+        })
+
+        const publicStatus = await status.findOne({
+            where: {
+                title: "public"
+            }
+        })
+
+        const trashedCurses = await trashedStatus.getCurses()
+        const publicCurses = await publicStatus.getCurses()
+
+        for(let i = 0; i < publicCurses.length; i++) {
+            const center = await publicCurses[i].getEducational_centers({attributes: [ 'title' ]})
+            const item = publicCurses[i]
+
+            resultPublic.push({
+                curse_id: item.curse_id,
+                title: item.title,
+                lector: item.lector,
+                date_start: item.date_start,
+                date_end: item.date_end,
+                program: item.program,
+                town: item.town,
+                price: item.price,
+                address: item.address,
+                score: item.score,
+                image: item.image,
+                eduCenter: center[0].title
+            })
+        }
+
+        for(let i = 0; i < trashedCurses.length; i++) {
+            const center = await trashedCurses[i].getEducational_centers({attributes: [ 'title' ]})
+            const item = trashedCurses[i]
+
+            resultTrashed.push({
+                curse_id: item.curse_id,
+                title: item.title,
+                lector: item.lector,
+                date_start: item.date_start,
+                date_end: item.date_end,
+                program: item.program,
+                town: item.town,
+                price: item.price,
+                address: item.address,
+                score: item.score,
+                image: item.image,
+                eduCenter: center[0].title
+            })
+        }
 
         for(let i = 0; i < curses.length; i++) {
             const center = await curses[i].getEducational_centers({attributes: [ 'title' ]})
@@ -173,10 +239,10 @@ module.exports = function(app, upload) {
             })
         }
 
-        res.json({ok: true, curses: result})
+        res.json({ok: true, curses: result, trashed: resultTrashed, public: resultPublic})
     })
 
-    app.post('/super-user/curse-categories', async (req, res) => {
+    app.post('/super-user/data-curse', async (req, res) => {
         const { curse_id } = req.body
         const aCurse = await curse.findOne({
             where: {
@@ -184,7 +250,10 @@ module.exports = function(app, upload) {
             }
         })
 
+        let aStatus
+
         const cats = await aCurse.getCategories()
+        const statusCurse = await aCurse.getStatuses()
 
         const nameCats = []
         const catIds = []
@@ -207,7 +276,7 @@ module.exports = function(app, upload) {
             catIds.push(categ.category_id)
         })
 
-        res.json({ok: true, nameCats, cats2id, catIds, allCats})
+        res.json({ok: true, nameCats, cats2id, catIds, allCats, statusCurse})
     })
 
     app.get('/super-user/centers', async (req, res) => {
