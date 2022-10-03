@@ -1,5 +1,5 @@
 module.exports = function(app, upload) {
-    const { educationalCenter, moderation, articles, rubrics, curse, category, status, doctor, Op } = require('../db/scheme')
+    const { educationalCenter, accessRight, moderation, articles, rubrics, curse, category, status, doctor, Op } = require('../db/scheme')
     const signature = "FJWr"
     const { v4: uuidv4 } = require('uuid')
     const jwt = require('jsonwebtoken')
@@ -349,8 +349,11 @@ module.exports = function(app, upload) {
             }
         })
         const status = await ec.getStatuses()
+        const rights = await ec.getAccess_rights()
 
-        res.json({ok: true, center: ec, status: status[0]?.title || 'public'})
+        const allRights = await accessRight.findAll()
+
+        res.json({ok: true, center: ec, status: status[0]?.title || 'public', rights, allRights})
     })
 
     app.post('/super-user/add-center', async (req, res) => {
@@ -386,7 +389,7 @@ module.exports = function(app, upload) {
     })
 
     app.post('/super-user/save-center', async (req, res) => {
-        const { center } = req.body
+        const { center, rights } = req.body
 
         if(center.password) {
             await educationalCenter.update({
@@ -439,6 +442,26 @@ module.exports = function(app, upload) {
                 "Изменение данных",
                 text
             )
+        }
+
+        const ec = await educationalCenter.findOne({
+            where: {
+                educational_center_id: center.educational_center_id
+            }
+        })
+
+        await ec.setAccess_rights(null)
+
+        for(let i = 0; i < rights.length; i++) {
+            const right = rights[i]
+
+            const aRight = await accessRight.findOne({
+                where: {
+                    access_rights_id: right
+                }
+            })
+
+            await ec.addAccess_right(aRight)
         }
 
         res.json({ok: true})

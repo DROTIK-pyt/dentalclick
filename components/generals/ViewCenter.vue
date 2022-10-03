@@ -37,7 +37,7 @@
             <v-btn
               dark
               text
-              @click="$emit('save')"
+              @click="save"
             >
               Сохранить изменения
             </v-btn>
@@ -85,6 +85,15 @@
                 row="1"
                 v-model="center.phone"
                 ></v-textarea>
+                <v-select
+                  v-model="currentRights"
+                  :items="rights"
+                  item-text="type"
+                  item-value="access_rights_id"
+                  label="Права"
+                  chips
+                  multiple
+                ></v-select>
               </v-col>
               <v-col
               cols="12"
@@ -136,9 +145,16 @@
 <script>
 export default {
   name: 'ViewCenter',
-  props: [ 'title', 'isShow', 'center', 'status' ],
+  props: [ 'title', 'isShow', 'center', 'status', 'rights', 'rightsEdu' ],
   data() {
     return{
+      currentRights: [],
+    }
+  },
+  methods: {
+    save() {
+
+      this.$emit('save', this.currentRights)
     }
   },
   computed: {
@@ -149,6 +165,9 @@ export default {
         return "Приостановить"
       }
     },
+  },
+  beforeMount() {
+    this.currentRights = this.rightsEdu
   }
 }
 </script>

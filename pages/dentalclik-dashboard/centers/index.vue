@@ -12,10 +12,13 @@
                 @editItem="toEditCenter"
             />
             <ViewCenter
+                v-if="isShowEdit"
                 :title="editCenter.title"
                 :isShow="isShowEdit"
                 :center="editCenter"
                 :status="statusCenter"
+                :rights="rights"
+                :rightsEdu="rightsEdu"
                 @save="isSaving"
                 @close="closeEdit"
                 @stopCenter="toStopCenter"
@@ -88,6 +91,10 @@ export default {
                 { text: 'Действие', align: 'start', value: 'actions' },
             ],
             centers: [],
+            rights: [],
+            rightsEdu: [],
+
+            tookRights: [],
 
             editCenter: {},
             isSaved: false,
@@ -160,13 +167,17 @@ export default {
             this.statusCenter = responsed.status
             this.editCenter = responsed.center
             this.isShowEdit = true
+            this.rightsEdu = responsed.rights
+            this.rights = responsed.allRights
         },
-        isSaving() {
+        isSaving(currentRights) {
             this.checkAuth()
 
             this.askTitle = "Сохранить изменения?"
             this.askText = "Изменения вступят в силу незамедлительно."
             this.isShowAskEdit = true
+
+            this.tookRights = currentRights
         },
         async saveEdit() {
             this.checkAuth()
@@ -177,7 +188,8 @@ export default {
                     'Content-Type': 'application/json;charset=utf-8',
                 },
                 body: JSON.stringify({
-                    center: this.editCenter
+                    center: this.editCenter,
+                    rights: this.tookRights
                 })
             })
 
