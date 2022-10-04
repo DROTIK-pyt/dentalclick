@@ -12,6 +12,62 @@ module.exports = function(app, upload) {
     // login: CNSUEE
     // pass: ZbPZP*>6
 
+    app.post('/super-user/accept-moderation', async (req, res) => {
+        const { data } = req.body
+
+        await moderation.destroy({
+            where: {
+                moderation_id: data.moderation_id
+            }
+        })
+
+        if(data.type == "doctor") {
+            await doctor.update({
+                name: data.newInfo.name,
+                email: data.newInfo.email,
+                phone: data.newInfo.phone,
+                region: data.newInfo.region,
+                specialization: data.newInfo.specialization,
+            }, {
+                where: {
+                    doctor_id: data.id
+                }
+            })
+        }
+        else if(data.type == "eduCenter") {
+            await educationalCenter.update({
+                title: data.newInfo.title,
+                email: data.newInfo.email,
+                phone: data.newInfo.phone,
+                contact_person: data.newInfo.contact_person,
+                site_url: data.newInfo.site_url,
+                requisites: data.newInfo.requisites,
+                add_notes: data.newInfo.add_notes,
+            }, {
+                where: {
+                    educational_center_id: data.id
+                }
+            })
+        }
+        else if (data.type == "register-new-doctor") {
+            await doctor.create({
+                name: data.newInfo.name,
+                email: data.newInfo.email,
+                phone: data.newInfo.phone,
+                region: data.newInfo.region,
+                specialization: data.newInfo.specialization,
+            })
+        }
+
+        res.json({ok: true})
+    })
+
+    app.get('/super-user/all-moderations', async (req, res) => {
+        const aModerations = await moderation.findAll()
+        
+        res.json({ok: true, aModerations})
+    })
+
     app.put('/super-user/doctor', async (req, res) => {
         const { aDoctor, aStatus } = req.body.data
 

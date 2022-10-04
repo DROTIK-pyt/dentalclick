@@ -59,6 +59,7 @@
         ></v-textarea>
         <CompleteSended
             :isSended="isSended"
+            @close="isSended = false"
         />
         </v-col>
     </v-row>

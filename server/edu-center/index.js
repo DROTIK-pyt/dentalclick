@@ -524,7 +524,6 @@ module.exports = function(app, upload) {
                 newInfo: data
             })
         })
-        await center.addModeration(newModerate)
 
         const text = `
             <h4>Администраторы уже получили информацию и проверяют ее, ожидайте.</h4>
@@ -650,11 +649,10 @@ module.exports = function(app, upload) {
             new_information: JSON.stringify({
                 type: "edu-center-change-accesses",
                 id: req.body.educational_center_id,
-                newInfo: { text: "Запрос смены доступов" }
+                newInfo: { text: "Запрос смены доступов", name: ec.title }
             })
         })
         if(ec) {
-            await ec.addModeration(moderate)
 
             const text = `
                 <h4>Администраторы уже получили информацию и проверяют ее, ожидайте.</h4>

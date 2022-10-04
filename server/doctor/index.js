@@ -16,6 +16,7 @@ module.exports = function(app, upload) {
         })
 
         const docStatus = await doc.getStatuses()
+
         res.json({info: doc, status: docStatus[0]?.title})
     })
 
@@ -282,8 +283,6 @@ module.exports = function(app, upload) {
             })
         })
 
-        await doc.addModeration(moderate)
-
         const text = `
             <h4>Администраторы уже получили информацию и проверяют ее, ожидайте.</h4>
             <p>Номер вашей заявки: <b>#${moderate.moderation_id}</b></p>
@@ -312,11 +311,9 @@ module.exports = function(app, upload) {
             new_information: JSON.stringify({
                 type: "doctor-change-accesses",
                 id: doctor_id,
-                newInfo: { text: "Запрос смены доступов" }
+                newInfo: { text: "Запрос смены доступов", name: doc.name }
             })
         })
-
-        await doc.addModeration(moderate)
 
         const text = `
             <h4>Администраторы уже получили информацию и проверяют ее, ожидайте.</h4>
