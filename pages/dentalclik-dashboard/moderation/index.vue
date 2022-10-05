@@ -9,7 +9,7 @@
                 @editItem="toShowInfo"
                 title="Модерации"
                 :headers="headerModer"
-                :items="moders"
+                :items="modersItem"
             />
             <ViewModeration
                 :isShow="isViewModer"
@@ -60,6 +60,11 @@ export default {
         }
     },
     components: { TableVueModer, ViewModeration },
+    computed: {
+        modersItem() {
+            return this.moders.reverse()
+        },
+    },
     methods: {
         async checkAuth() {
             if(this.$store.getters['superuser/getTokens'].refresh) {
