@@ -1,13 +1,15 @@
 module.exports = function(app, upload) {
-    const { educationalCenter, accessRight, moderation, articles, rubrics, curse, category, status, doctor, Op } = require('../db/scheme')
+    const { educationalCenter, accessRight, moderation, articles, rubrics, curse, category, status, doctor, admin, Op } = require('../db/scheme')
     const signature = "FJWr"
     const { v4: uuidv4 } = require('uuid')
     const jwt = require('jsonwebtoken')
     const base64 = require('base-64')
     const fs = require('fs')
     const md5 = require('md5')
+    const generator = require('generate-password')
     const { sendEmail } = require('../sendMail') // Отправка сообщений на почту
     let dataUser = require('./dataUser')
+    let userAccessRights = require('../config/userAccessRights')
 
     // login: CNSUEE
     // pass: ZbPZP*>6
@@ -570,5 +572,220 @@ module.exports = function(app, upload) {
         } else {
             res.json({ok: false})
         }
+    })
+
+    app.get('/super-user/admin', async (req, res) => {
+        const admins = await admin.findAll()
+
+        let result = []
+        admins.forEach(theAdmin => {
+            result.push({
+                admin_id: theAdmin.admin_id,
+                login: theAdmin.login,
+            })
+        })
+
+        res.json({ok: true, admins: result})
+    })
+
+    app.get('/super-user/admin/get/rights', async (req, res) => {
+        res.json(userAccessRights)
+    })
+
+    app.post('/super-user/admin/own-rights', async (req, res) => {
+        const { admin_id } = req.body
+
+        const anAdmin = await admin.findOne({
+            where: {
+                admin_id
+            }
+        })
+
+        const ownRights = await anAdmin.getAccess_rights()
+
+        res.json({ok: true, ownRights})
+    })
+
+    app.post('/super-user/admin/add', async (req, res) => {
+        const { email, rights } = req.body
+
+        if(!email) {
+            res.json({ok: false, msg: "E-mail пустой"})
+            return
+        }
+
+        const anAdmin = await admin.findOne({
+            where: {
+                login: email
+            }
+        })
+
+        const theRights = await accessRight.findAll({
+            where: {
+                type: {
+                    [Op.in]: rights
+                }
+            }
+        })
+
+        if(!anAdmin) {
+            const password = generator.generate({
+                numbers: true,
+                length: 10
+            })
+
+            const hashedPassword = md5(password)
+
+            const theAdmin = await admin.create({
+                login: email,
+                password: hashedPassword
+            })
+
+            for(let i = 0; i < theRights.length; i++) {
+                let theRight = theRights[i]
+
+                await theAdmin.addAccess_right(theRight)
+            }
+
+            const text = `
+                <p>Добро пожаловать, ${email}!</p>
+                <p>Ваш логин - это ваш E-mail.</p>
+                <p>Ваш пароль - ${password}</p>
+                <p>Никому его не сообщайте! Если забудете пароль напишите в поддержку.</p>
+            `
+
+            sendEmail(
+                email,
+                "Добро пожаловать в DentalClik!",
+                text
+            )
+
+        } else {
+            res.json({ok: false, msg: "Такой админ уже есть в системе."})
+            return
+        }
+
+        res.json({ok: true})
+    })
+
+    app.put('/super-user/admin/regenerate-password', async (req, res) => {
+        const { email } = req.body
+
+        if(!email) return
+
+        const theAdmin = await admin.findOne({
+            where: {
+                login: email
+            }
+        })
+
+        const password = generator.generate({
+            numbers: true,
+            length: 10
+        })
+
+        const hashedPassword = md5(password)
+        theAdmin.password = hashedPassword
+
+        await theAdmin.save()
+
+        const text = `
+            <p>Ваш новый пароль - ${password}</p>
+            <p>Никому его не сообщайте! Если забудете пароль напишите в поддержку.</p>
+        `
+
+        sendEmail(
+            email,
+            "Изменение пароля",
+            text
+        )
+
+        res.json({ok: true})
+    })
+
+    app.put('/super-user/admin', async (req, res) => {
+        const { admin_id, newEmail, rights } = req.body
+
+        const theAdmin = await admin.findOne({
+            where: {
+                admin_id
+            }
+        })
+
+        const ownRights = await accessRight.findAll({
+            where: {
+                type: {
+                    [Op.in]: rights
+                }
+            }
+        })
+
+        await theAdmin.setAccess_rights(null)
+        for(let i = 0; i < ownRights.length; i++) {
+            let ownRight = ownRights[i]
+
+            await theAdmin.addAccess_right(ownRight)
+        }
+
+        const oldEmail = theAdmin.login
+        if(newEmail != oldEmail) {
+            theAdmin.login = newEmail
+            await theAdmin.save()
+
+            const text = `
+                <p>Ваши данные были изменены.</p>
+                <p>Предыдущий - ${oldEmail}</p>
+                <p>Текущий - ${newEmail}</p>
+            `
+
+            sendEmail(
+                oldEmail,
+                "Изменение данных аккаунта",
+                text
+            )
+            res.json({ok: true})
+            return
+        }
+
+        const text = `
+            <p>Ваши права доступа были изменены.</p>
+        `
+
+        sendEmail(
+            oldEmail,
+            "Изменение данных аккаунта",
+            text
+        )
+
+        res.json({ok: true})
+    })
+
+    app.delete('/super-user/admin', async (req, res) => {
+        const { admin_id } = req.body
+
+        const theAdmin = await admin.findOne({
+            where: {
+                admin_id
+            }
+        })
+
+        await admin.destroy({
+            where: {
+                admin_id
+            }
+        })
+
+        const text = `
+            <p>Ваш аккаунт был удален. Вы больше не сможете вносить изменения.</p>
+            <p>С уважением DentalClik.</p>
+        `
+
+        sendEmail(
+            theAdmin.login,
+            "Аккаунт удален",
+            text
+        )
+
+        res.json({ok: true})
     })
 }

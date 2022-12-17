@@ -254,6 +254,26 @@ const moderation = sequelize.define('moderation', {
     }
 })
 
+const admin = sequelize.define('admin', {
+    admin_id: {
+        type: DataTypes.INTEGER,
+        autoIncrement: true,
+        primaryKey: true,
+        allowNull: false,
+    },
+    login: {
+        type: DataTypes.STRING,
+        allowNull: false,
+    },
+    password: {
+        type: DataTypes.STRING,
+        allowNull: false
+    }
+})
+
+admin.belongsToMany(accessRight, {through: "adminRights"})
+accessRight.belongsToMany(admin, {through: "adminRights"})
+
 module.exports = {
     dbBaseSetting,
     DataTypes,
@@ -268,4 +288,5 @@ module.exports = {
     accessRight,
     educationalCenter,
     moderation,
+    admin,
 }

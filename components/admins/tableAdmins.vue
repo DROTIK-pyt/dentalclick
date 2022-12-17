@@ -1,7 +1,25 @@
 <template>
-    <v-row>
-
-    </v-row>
+  <v-data-table
+    :headers="headers"
+    :items="admins"
+    class="elevation-1"
+  >
+    <template v-slot:item.actions="{ item }">
+      <v-icon
+        small
+        class="mr-2"
+        @click="editItem(item)"
+      >
+        mdi-pencil
+      </v-icon>
+      <v-icon
+        small
+        @click="deleteItem(item)"
+      >
+        mdi-delete
+      </v-icon>
+    </template>
+  </v-data-table>
 </template>
 
 <script>
@@ -9,13 +27,14 @@ const baseSettings = require('../../server/config/serverSetting')
 const base64 = require('base-64')
 
 export default {
-    layout: "ProfileSuperUser",
-    components: {},
-    data() {
-        return {
+    data: () => ({
+        headers: [
+            { text: 'E-mail', value: 'login', sortable: false },
+            { text: 'Actions', value: 'actions', sortable: false },
+        ],
+        admins: [],
 
-        }
-    },
+    }),
     methods: {
         async checkAuth() {
             if(this.$store.getters['superuser/getTokens'].refresh) {
@@ -45,22 +64,27 @@ export default {
                 }
             }
         },
+        editItem(item) {
+            this.$emit("editItem", item)
+        },
+        deleteItem(item) {
+            this.$emit("deleteItem", item)
+        },
         async getAllData() {
             this.checkAuth()
 
+            const data = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/super-user/admin`)
+            const result = await data.json()
+
+            if(result.ok) {
+                // console.log(result.admins)
+                this.admins = result.admins
+            }
         },
     },
-    beforeMount() {
+    async beforeMount() {
         this.getAllData()
-
-        this.$store.commit('superuser/syncState')
-        if (!this.$store.getters['superuser/getIsAuth']) {
-            this.$router.push({path: `/dentalclik-dashboard/login`})
-        }
     },
-    beforeDestroy() {
-        this.$store.commit('superuser/saveState')
-    }
 }
 </script>
 
