@@ -28,7 +28,7 @@
                 color="primary"
                 elevation="2"
                 large
-                @click.prevent="loginSuperUser"
+                @click.prevent="loginAdmin"
                 >Войти</v-btn>
             </v-form>
         </v-col>
@@ -48,8 +48,8 @@ export default {
         }
     },
     methods: {
-        async loginSuperUser() {
-            const response = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/super-user/login`, {
+        async loginAdmin() {
+            const response = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/admin/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json;charset=utf-8',
@@ -61,8 +61,8 @@ export default {
             })
             const result = await response.json()
             if(result.ok) {
-                this.$store.commit('superuser/authenticate', {tokens: result.tokens})
-                this.$router.push({path: `/dentalclik-dashboard/`})
+                this.$store.commit('admins/authenticate', {tokens: result.tokens, admin_id: result.admin_id})
+                this.$router.push({path: `/admin/`})
             } else {
                 this.errors.push(result.error.msg)
             }
@@ -76,13 +76,13 @@ export default {
         }
     },
     beforeMount() {
-        this.$store.commit('superuser/syncState')
-        if (this.$store.getters['superuser/getIsAuth']) {
-            this.$router.push({path: `/dentalclik-dashboard/profile`})
+        this.$store.commit('admins/syncState')
+        if (this.$store.getters['admins/getIsAuth']) {
+            this.$router.push({path: `/admin/`})
         }
     },
     beforeDestroy() {
-        this.$store.commit('superuser/saveState')
+        this.$store.commit('admins/saveState')
     }
 }
 </script>

@@ -15,7 +15,7 @@
         :headers="headers"
         :items="items"
         :search="search"
-        items-per-page="5"
+        
         >
         <template v-slot:item.currType="{ item }">
             <span v-if='JSON.parse(item.new_information).type === "doctor"'>

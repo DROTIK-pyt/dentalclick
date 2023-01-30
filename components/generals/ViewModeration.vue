@@ -184,9 +184,9 @@ export default {
         }
     },
     methods: {
-        acceptNewData() {
-            this.$emit('accept')
-        }
+      acceptNewData() {
+        this.$emit('accept')
+      }
     },
 }
 </script>

@@ -34,6 +34,7 @@ require('./edu-center/index')(app, upload) // Образовательный ц�
 require('./general/index')(app, upload) // Глобальные запросы (скрытые)
 require('./doctor/index')(app, upload) // Доктора
 require('./super-user/index')(app, upload) // Супер пользователь
+require('./admin/index')(app, upload) // Админы
 
 app.listen(baseSettings.port, () => {
     console.log(`Server start on ${baseSettings.baseUrl}:${baseSettings.port}/`)

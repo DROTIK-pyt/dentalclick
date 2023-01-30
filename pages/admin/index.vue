@@ -9,7 +9,7 @@ const baseSettings = require('../../server/config/serverSetting')
 const base64 = require('base-64')
 
 export default {
-    layout: "ProfileSuperUser",
+    layout: "ProfileAdmin",
     components: {},
     data() {
         return {
@@ -18,29 +18,31 @@ export default {
     },
     methods: {
         async checkAuth() {
-            if(this.$store.getters['superuser/getTokens'].refresh) {
-                const refresh = this.$store.getters['superuser/getTokens'].refresh
-                const payload = JSON.parse(base64.decode(this.$store.getters['superuser/getTokens'].access.split('.')[1]))
+            if(this.$store.getters['admins/getTokens'].refresh) {
+                const refresh = this.$store.getters['admins/getTokens'].refresh
+                const payload = JSON.parse(base64.decode(this.$store.getters['admins/getTokens'].access.split('.')[1]))
 
                 if(Math.ceil(Date.now()/1000) >= +payload.exp - 8) {
-                    const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/super-user/refresh`, {
+                    const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/admin/refresh`, {
                         method: "POST",
                         headers: {
                             'Content-Type': 'application/json;charset=utf-8',
                         },
                         body: JSON.stringify({
                             refresh: refresh,
+                            admin_id: this.$store.getters['admins/getId'],
                         })
                     })
                     const responsed = await result.json()
                     if(responsed.ok) {
                         console.log()
-                        this.$store.commit('superuser/authenticate', {
+                        this.$store.commit('admins/authenticate', {
                             tokens: responsed.tokens
                         })
+                        this.$store.commit('admins/saveState')
                     } else {
-                        this.$store.commit('superuser/logout')
-                        this.$router.push({path: `/dentalclik-dashboard/login`})
+                        this.$store.commit('admins/logout')
+                        this.$router.push({path: `/admin/login`})
                     }
                 }
             }
@@ -53,13 +55,13 @@ export default {
     beforeMount() {
         this.getAllData()
 
-        this.$store.commit('superuser/syncState')
-        if (!this.$store.getters['superuser/getIsAuth']) {
-            this.$router.push({path: `/dentalclik-dashboard/login`})
+        this.$store.commit('admins/syncState')
+        if (!this.$store.getters['admins/getIsAuth']) {
+            this.$router.push({path: `/admin/login`})
         }
     },
     beforeDestroy() {
-        this.$store.commit('superuser/saveState')
+        this.$store.commit('admins/saveState')
     }
 }
 </script>

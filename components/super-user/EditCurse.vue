@@ -25,6 +25,7 @@
                 dark
                 text
                 @click="saveCurse"
+                v-if="isAdmin && canEdit"
                 >
                 Сохранить изменения
                 </v-btn>
@@ -46,6 +47,7 @@
                                     <v-text-field
                                     label="Название"
                                     v-model="aCurse.title"
+                                    :readonly="isAdmin && !canEdit"
                                 ></v-text-field>
                                 </v-list-item-content>
                             </v-list-item>
@@ -56,6 +58,7 @@
                                 rows="5"
                                 row-height="20"
                                 v-model="aCurse.program"
+                                :readonly="isAdmin && !canEdit"
                                 ></v-textarea>
                             </v-list-item>
                             <v-row>
@@ -70,7 +73,7 @@
                                         sm="12"
                                         >
                                         <span>Дата начала</span><br>
-                                        <br><v-date-picker v-model="aCurse.date_start"></v-date-picker>
+                                        <br><v-date-picker :readonly="isAdmin && !canEdit" v-model="aCurse.date_start"></v-date-picker>
                                         </v-col>
                                         </v-list-item-content>
                                     </v-list-item>
@@ -86,7 +89,7 @@
                                         sm="12"
                                         >
                                         <span>Дата окончания</span><br>
-                                        <br><v-date-picker v-model="aCurse.date_end"></v-date-picker>
+                                        <br><v-date-picker :readonly="isAdmin && !canEdit" v-model="aCurse.date_end"></v-date-picker>
                                         </v-col>
                                         </v-list-item-content>
                                     </v-list-item>
@@ -102,6 +105,7 @@
                             <v-text-field
                                 label="Город проведения"
                                 v-model="aCurse.town"
+                                :readonly="isAdmin && !canEdit"
                             ></v-text-field>
                             </v-list-item-content>
                         </v-list-item>
@@ -110,6 +114,7 @@
                             <v-text-field
                                 label="Адрес проведения"
                                 v-model="aCurse.address"
+                                :readonly="isAdmin && !canEdit"
                             ></v-text-field>
                             </v-list-item-content>
                         </v-list-item>
@@ -118,6 +123,7 @@
                             <v-text-field
                                 label="ФИО лектора(ов)"
                                 v-model="aCurse.lector"
+                                :readonly="isAdmin && !canEdit"
                             ></v-text-field>
                             </v-list-item-content>
                         </v-list-item>
@@ -126,6 +132,7 @@
                             <v-text-field
                                 label="Цена"
                                 v-model="aCurse.price"
+                                :readonly="isAdmin && !canEdit"
                             ></v-text-field>
                             </v-list-item-content>
                         </v-list-item>
@@ -134,6 +141,7 @@
                             <v-text-field
                                 label="Баллы"
                                 v-model="aCurse.score"
+                                :readonly="isAdmin && !canEdit"
                             ></v-text-field>
                             </v-list-item-content>
                         </v-list-item>
@@ -149,6 +157,7 @@
                                     chips
                                     label="Категории"
                                     multiple
+                                    :readonly="isAdmin && !canEdit"
                                 ></v-select>
                             </v-col>
                             <v-col
@@ -160,6 +169,7 @@
                                     :items="itemStatuses"
                                     label="Статус"
                                     solo
+                                    :readonly="isAdmin && !canEdit"
                                 ></v-select>
                             </v-col>
                         </v-list-item>
@@ -173,6 +183,7 @@
                                 @change="fileUploadEdit"
                                 label="Превью"
                                 accept="image/*"
+                                v-if="isAdmin && canEdit"
                                 ></v-file-input>
                             </v-col>
                             <v-col
@@ -203,6 +214,7 @@
 </template>
 
 <script>
+const baseSettings = require('../../server/config/serverSetting')
 const { v4: uuidv4 } = require('uuid')
 
 export default {
@@ -228,10 +240,35 @@ export default {
                 "В корзине": 2
             },
 
-            resultCategoryIds: []
+            resultCategoryIds: [],
+
+            isAdmin: false,
+            canEdit: false
         }
     },
     methods: {
+        async checkAccesses() {
+            if(this.$store.getters['admins/getId']) {
+                this.isAdmin = true
+                const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/admin/accesses`, {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json;charset=utf-8'
+                    },
+                    body: JSON.stringify({
+                        admin_id: this.$store.getters['admins/getId']
+                    })
+                })
+                const {accessRights} = await result.json()
+
+                let rights = []
+                for(const accessRight of accessRights) {
+                    rights.push(accessRight.type)
+                }
+
+                this.canEdit = rights.includes('admin_edit_curse')
+            }
+        },
         fileUploadEdit() {
             const filename = this.$refs.imageCurseEdit.$refs.input.files
             if (filename.length) {
@@ -256,9 +293,62 @@ export default {
             this.$emit('saveCurseItem', result)
         }
     },
-    beforeMount() {
+    computed: {
+        async checkEditCurse() {
+            if(this.$store.getters['admins/getId']) {
+
+                const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/admin/accesses`, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8'
+                },
+                body: JSON.stringify({
+                    admin_id: this.$store.getters['admins/getId']
+                })
+                })
+                const {accessRights} = await result.json()
+
+                let rights = []
+                for(const accessRight of accessRights) {
+                rights.push(accessRight.type)
+                }
+
+                return rights.includes('admin_edit_curse')
+            }
+            return true
+        },
+    },
+    async beforeMount() {
         this.editCategoryItems = this.categoryItems
         this.currentStatus = this.idStatus2title[this.statusCurse.status_id]
+
+        if(this.$store.getters['admins/getId']) {
+            this.isAdmin = true
+
+            const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/admin/accesses`, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json;charset=utf-8'
+                },
+                body: JSON.stringify({
+                    admin_id: this.$store.getters['admins/getId']
+                })
+            })
+            const {accessRights} = await result.json()
+
+            let rights = []
+            for(const accessRight of accessRights) {
+                rights.push(accessRight.type)
+            }
+
+            if(rights.includes('admin_edit_center')) {
+                this.canEdit = true
+            }
+
+            if(rights.includes('admin_remove_center')) {
+                this.canRemove = true
+            }
+        }
     }
 }
 </script>

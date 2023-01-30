@@ -22,6 +22,7 @@
               dark
               text
               @click="$emit('deleteCenter', center.educational_center_id)"
+              v-if="isAdmin && canRemove"
             >
               Удалить центр
             </v-btn>
@@ -31,6 +32,7 @@
               dark
               text
               @click="$emit('stopCenter', center.educational_center_id)"
+              v-if="isAdmin && canEdit"
             >
               {{ text }}
             </v-btn>
@@ -38,6 +40,7 @@
               dark
               text
               @click="save"
+              v-if="isAdmin && canEdit"
             >
               Сохранить изменения
             </v-btn>
@@ -57,6 +60,8 @@
                 row-height="7"
                 row="1"
                 v-model="center.title"
+                
+                :readonly="isAdmin && !canEdit"
                 ></v-textarea>
                 <v-textarea
                 name="input-7-1"
@@ -66,6 +71,8 @@
                 row-height="7"
                 row="1"
                 v-model="center.password"
+                
+                :readonly="isAdmin && !canEdit"
                 ></v-textarea>
                 <v-textarea
                 name="input-7-1"
@@ -75,6 +82,8 @@
                 row-height="7"
                 row="1"
                 v-model="center.contact_person"
+                
+                :readonly="isAdmin && !canEdit"
                 ></v-textarea>
                 <v-textarea
                 name="input-7-1"
@@ -84,6 +93,8 @@
                 row-height="7"
                 row="1"
                 v-model="center.phone"
+                
+                :readonly="isAdmin && !canEdit"
                 ></v-textarea>
                 <v-select
                   v-model="currentRights"
@@ -93,6 +104,8 @@
                   label="Права"
                   chips
                   multiple
+                  
+                  :readonly="isAdmin && !canEdit"
                 ></v-select>
               </v-col>
               <v-col
@@ -107,6 +120,8 @@
                 row-height="7"
                 row="1"
                 v-model="center.email"
+                
+                :readonly="isAdmin && !canEdit"
                 ></v-textarea>
                 <v-textarea
                 name="input-7-1"
@@ -116,6 +131,8 @@
                 row-height="7"
                 row="1"
                 v-model="center.site_url"
+                
+                :readonly="isAdmin && !canEdit"
                 ></v-textarea>
                 <v-textarea
                 name="input-7-1"
@@ -125,6 +142,8 @@
                 row-height="15"
                 row="1"
                 v-model="center.requisites"
+                
+                :readonly="isAdmin && !canEdit"
                 ></v-textarea>
                 <v-textarea
                 name="input-7-1"
@@ -134,6 +153,8 @@
                 row-height="20"
                 row="1"
                 v-model="center.add_notes"
+                
+                :readonly="isAdmin && !canEdit"
                 ></v-textarea>
               </v-col>
           </v-row>
@@ -143,18 +164,48 @@
 </template>
 
 <script>
+const baseSettings = require('../../server/config/serverSetting')
 export default {
   name: 'ViewCenter',
   props: [ 'title', 'isShow', 'center', 'status', 'rights', 'rightsEdu' ],
   data() {
     return{
       currentRights: [],
+
+      canEdit: false,
+      canRemove: false,
+
+      isAdmin: false
     }
   },
   methods: {
     save() {
 
       this.$emit('save', this.currentRights)
+    },
+    async checkAccesses() {
+      if(this.$store.getters['admins/getId']) {
+        this.isAdmin = true
+        const result = await fetch(`${baseSettings.baseUrl}:${baseSettings.port}/admin/accesses`, {
+          method: "POST",
+          headers: {
+              'Content-Type': 'application/json;charset=utf-8'
+          },
+          body: JSON.stringify({
+              admin_id: this.$store.getters['admins/getId']
+          })
+        })
+        const {accessRights} = await result.json()
+
+        let rights = []
+        for(const accessRight of accessRights) {
+          rights.push(accessRight.type)
+        }
+
+        this.canEdit = rights.includes('admin_edit_center')
+        this.canRemove = rights.includes('admin_remove_center')
+        // this.canAdd = rights.includes('admin_add_center')
+      }
     }
   },
   computed: {
@@ -166,8 +217,10 @@ export default {
       }
     },
   },
-  beforeMount() {
+  async beforeMount() {
     this.currentRights = this.rightsEdu
+
+    this.checkAccesses()
   }
 }
 </script>
